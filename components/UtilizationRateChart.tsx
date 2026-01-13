@@ -59,12 +59,6 @@ const POOL_CONFIGS: PoolConfig[] = [
     color: "#06b6d4",
     optimalUtilization: 93, // Compound V3's kink
   },
-  {
-    poolId: "b55f43a8-f444-4cd8-a3a4-0a4e786ba566",
-    name: "Morpho USDC",
-    color: "#10b981",
-    optimalUtilization: 90,
-  },
 ];
 
 type TimeRange = "1w" | "1m" | "3m" | "6m" | "1y" | "all";
@@ -325,20 +319,9 @@ export default function UtilizationRateChart({
                   {pool.name}
                 </ToggleButton>
               ))}
-              <div className="flex items-center gap-1 ml-2 pl-2 border-l border-slate-600">
-                <button
-                  onClick={selectAll}
-                  className="text-xs text-indigo-600 hover:underline"
-                >
-                  All
-                </button>
-                <span className="text-gray-300">|</span>
-                <button
-                  onClick={selectNone}
-                  className="text-xs text-indigo-600 hover:underline"
-                >
-                  None
-                </button>
+              <div className="flex items-center gap-1 bg-slate-700/50 rounded-lg p-0.5">
+                <button onClick={selectAll} className="px-2 py-0.5 text-xs font-medium text-slate-300 hover:bg-slate-600 rounded transition-colors">All</button>
+                <button onClick={selectNone} className="px-2 py-0.5 text-xs font-medium text-slate-300 hover:bg-slate-600 rounded transition-colors">None</button>
               </div>
             </div>
 

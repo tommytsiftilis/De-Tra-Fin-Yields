@@ -187,7 +187,7 @@ function MetricCard({
   return (
     <div className="bg-slate-800/70 rounded-xl border border-slate-600/50 ring-1 ring-slate-700/30 p-4 hover:bg-slate-700/60 hover:ring-slate-600/40 transition-all">
       <div className="flex items-start justify-between mb-2">
-        <p className="text-sm font-medium text-slate-300">{title}</p>
+        <p className="text-base font-semibold text-white">{title}</p>
         {icon}
       </div>
 

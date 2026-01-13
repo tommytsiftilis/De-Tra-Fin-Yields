@@ -130,7 +130,7 @@ export default function HeroSection({
     <div className="bg-slate-800/80 rounded-2xl p-6 md:p-8 border border-slate-600/60 ring-1 ring-slate-700/50 backdrop-blur-sm shadow-sm">
       {/* Title */}
       <div className="text-center mb-6">
-        <p className="text-base font-semibold text-slate-300 uppercase tracking-wide">
+        <p className="text-lg font-bold text-white uppercase tracking-wide">
           Current Yield Comparison
         </p>
       </div>
@@ -142,7 +142,7 @@ export default function HeroSection({
           <div className="inline-block">
             <div className="flex items-center justify-center md:justify-end gap-2 mb-2">
               <span className="w-3 h-3 rounded-full bg-indigo-500"></span>
-              <span className="text-sm font-medium text-indigo-300">DeFi Stablecoin</span>
+              <span className="text-sm font-semibold text-indigo-300">DeFi Stablecoin</span>
             </div>
 
             {/* DeFi selector */}
@@ -162,7 +162,7 @@ export default function HeroSection({
                 {formatPercent(defiRate)}
               </p>
             )}
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-slate-300 mt-1">
               {defiLabel.asset} on {defiLabel.protocol}
             </p>
           </div>
@@ -230,7 +230,7 @@ export default function HeroSection({
           <div className="inline-block">
             <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
               <span className="w-3 h-3 rounded-full bg-amber-500"></span>
-              <span className="text-sm font-medium text-amber-400">TradFi Risk-Free</span>
+              <span className="text-sm font-semibold text-amber-400">TradFi Risk-Free</span>
             </div>
 
             {/* TradFi selector */}
@@ -250,7 +250,7 @@ export default function HeroSection({
                 {formatPercent(tradfiRate)}
               </p>
             )}
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-slate-300 mt-1">
               {tradfiLabel}
             </p>
           </div>
