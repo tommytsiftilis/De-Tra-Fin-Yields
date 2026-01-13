@@ -416,10 +416,13 @@ export default function UtilizationRateChart({
         </div>
       </div>
 
-      <div className="px-4 py-3 bg-slate-700/40 border-t border-slate-700">
+      <div className="px-4 py-3 bg-slate-700/40 border-t border-slate-700 space-y-2">
         <p className="text-xs text-slate-400">
           <span className="font-medium">Why utilization matters:</span> When utilization exceeds the optimal rate (~92%),
           interest rates increase sharply to incentivize more deposits. High utilization = higher yields but less liquidity.
+        </p>
+        <p className="text-xs text-slate-500">
+          <span className="font-medium">Note:</span> Morpho is not shown here because it's a vault aggregator, not a direct lending pool. Vaults don't have traditional borrow/supply utilization metrics.
         </p>
       </div>
     </div>

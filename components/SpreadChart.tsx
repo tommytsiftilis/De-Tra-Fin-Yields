@@ -116,7 +116,7 @@ function CustomTooltip({
 }) {
   if (!active || !payload || payload.length === 0) return null;
 
-  // Get visible rate values
+  // Get visible rate values and sort by value (highest first)
   const rateValues: { name: string; value: number; color: string; type: "defi" | "tradfi" }[] = [];
 
   for (const entry of payload) {
@@ -130,6 +130,9 @@ function CustomTooltip({
       });
     }
   }
+
+  // Sort by value descending (highest at top)
+  rateValues.sort((a, b) => b.value - a.value);
 
   // Calculate spread if exactly one DeFi and one TradFi are selected
   const defiRates = rateValues.filter((r) => r.type === "defi");
