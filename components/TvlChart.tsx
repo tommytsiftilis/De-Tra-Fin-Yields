@@ -10,9 +10,15 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  TooltipProps,
 } from "recharts";
-import { formatShortDate } from "@/lib/utils";
 import { format, parseISO } from "date-fns";
+
+// Format date for tooltip
+function formatTooltipDate(dateStr: string): string {
+  const d = parseISO(dateStr);
+  return format(d, "MMM d, yyyy");
+}
 
 interface UtilizationData {
   poolId: string;
@@ -95,6 +101,60 @@ function ToggleButton({
       />
       {children}
     </button>
+  );
+}
+
+// Custom tooltip that sorts TVL values from highest to lowest
+function CustomTooltip({
+  active,
+  payload,
+  label,
+}: TooltipProps<number, string>) {
+  if (!active || !payload || payload.length === 0) return null;
+
+  // Get TVL values and sort by value (highest first)
+  const tvlValues: { name: string; value: number; color: string }[] = [];
+
+  for (const entry of payload) {
+    const pool = POOL_CONFIGS.find((p) => p.key === entry.dataKey);
+    if (pool && entry.value !== undefined && entry.value !== null) {
+      tvlValues.push({
+        name: pool.name,
+        value: entry.value as number,
+        color: pool.color,
+      });
+    }
+  }
+
+  // Sort by value descending (highest at top)
+  tvlValues.sort((a, b) => b.value - a.value);
+
+  return (
+    <div className="bg-slate-800 border border-slate-600 rounded-lg shadow-lg p-3 min-w-[180px]">
+      <p className="text-xs font-medium text-slate-400 mb-2">
+        {formatTooltipDate(label as string)}
+      </p>
+
+      {/* TVL values */}
+      {tvlValues.length > 0 && (
+        <div className="space-y-1">
+          {tvlValues.map((item) => (
+            <div key={item.name} className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <span
+                  className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: item.color }}
+                />
+                <span className="text-xs text-slate-300">{item.name}</span>
+              </div>
+              <span className="text-xs font-mono font-medium text-white">
+                {formatTvl(item.value)}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -348,16 +408,7 @@ export default function TvlChart({
                   tickLine={false}
                   axisLine={false}
                 />
-                <Tooltip
-                  formatter={(value: number) => [formatTvl(value)]}
-                  labelFormatter={(label) => formatShortDate(label)}
-                  contentStyle={{
-                    backgroundColor: "#1e293b",
-                    border: "1px solid #475569",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                  }}
-                />
+                <Tooltip content={<CustomTooltip />} />
                 <Legend verticalAlign="top" height={36} />
 
                 {availablePools.map((pool) =>

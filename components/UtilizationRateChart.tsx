@@ -61,7 +61,7 @@ const POOL_CONFIGS: PoolConfig[] = [
   },
 ];
 
-type TimeRange = "1w" | "1m" | "3m" | "6m" | "1y" | "all";
+type TimeRange = "1w" | "1m" | "3m" | "6m" | "1y" | "all" | "custom";
 
 const TIME_RANGES: { value: TimeRange; label: string; days: number }[] = [
   { value: "1w", label: "1W", days: 7 },
@@ -74,7 +74,7 @@ const TIME_RANGES: { value: TimeRange; label: string; days: number }[] = [
 
 function formatAxisDate(dateStr: string, timeRange: TimeRange): string {
   const d = parseISO(dateStr);
-  if (timeRange === "1w" || timeRange === "1m" || timeRange === "3m") {
+  if (timeRange === "1w" || timeRange === "1m" || timeRange === "3m" || timeRange === "custom") {
     return format(d, "MMM d");
   }
   return format(d, "MMM ''yy");
@@ -127,6 +127,9 @@ export default function UtilizationRateChart({
     new Set(POOL_CONFIGS.map((p) => p.poolId))
   );
   const [timeRange, setTimeRange] = useState<TimeRange>("3m");
+  const [customStartDate, setCustomStartDate] = useState<string>("");
+  const [customEndDate, setCustomEndDate] = useState<string>("");
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const togglePool = (poolId: string) => {
     setVisiblePools((prev) => {
@@ -146,6 +149,20 @@ export default function UtilizationRateChart({
 
   const selectNone = () => {
     setVisiblePools(new Set());
+  };
+
+  const handleTimeRangeChange = (range: TimeRange) => {
+    setTimeRange(range);
+    if (range !== "custom") {
+      setShowDatePicker(false);
+    }
+  };
+
+  const applyCustomDateRange = () => {
+    if (customStartDate && customEndDate) {
+      setTimeRange("custom");
+      setShowDatePicker(false);
+    }
   };
 
   // Merge all pool data into a single time series
@@ -171,13 +188,22 @@ export default function UtilizationRateChart({
 
     // Filter by time range
     let filteredDates = sortedDates;
-    const range = TIME_RANGES.find((r) => r.value === timeRange);
-    if (range && range.days !== Infinity) {
-      const cutoffDate = new Date();
-      cutoffDate.setDate(cutoffDate.getDate() - range.days);
-      filteredDates = sortedDates.filter(
-        (dateStr) => new Date(dateStr) >= cutoffDate
-      );
+    if (timeRange === "custom" && customStartDate && customEndDate) {
+      const startDate = new Date(customStartDate);
+      const endDate = new Date(customEndDate);
+      filteredDates = sortedDates.filter((dateStr) => {
+        const date = new Date(dateStr);
+        return date >= startDate && date <= endDate;
+      });
+    } else {
+      const range = TIME_RANGES.find((r) => r.value === timeRange);
+      if (range && range.days !== Infinity) {
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - range.days);
+        filteredDates = sortedDates.filter(
+          (dateStr) => new Date(dateStr) >= cutoffDate
+        );
+      }
     }
 
     // Sample for performance
@@ -190,7 +216,7 @@ export default function UtilizationRateChart({
     );
 
     return sampledDates.map((date) => dateMap.get(date)!);
-  }, [data, timeRange]);
+  }, [data, timeRange, customStartDate, customEndDate]);
 
   // Get current utilization for each pool
   const currentUtilization = useMemo(() => {
@@ -232,9 +258,14 @@ export default function UtilizationRateChart({
           {formatShortDate(label)}
         </p>
         <div className="space-y-2">
-          {payload.map((entry) => {
-            const poolConfig = POOL_CONFIGS.find((p) => p.poolId === entry.dataKey);
-            if (!poolConfig || !visiblePools.has(entry.dataKey)) return null;
+          {[...payload]
+            .filter((entry) => {
+              const poolConfig = POOL_CONFIGS.find((p) => p.poolId === entry.dataKey);
+              return poolConfig && visiblePools.has(entry.dataKey);
+            })
+            .sort((a, b) => b.value - a.value)
+            .map((entry) => {
+            const poolConfig = POOL_CONFIGS.find((p) => p.poolId === entry.dataKey)!;
 
             const supply = dataPoint?.[`${entry.dataKey}_supply`] as number;
             const borrow = dataPoint?.[`${entry.dataKey}_borrow`] as number;
@@ -326,20 +357,68 @@ export default function UtilizationRateChart({
             </div>
 
             {/* Time range selector */}
-            <div className="flex rounded-lg border border-slate-600 overflow-hidden">
-              {TIME_RANGES.map((range) => (
+            <div className="flex items-center gap-2">
+              <div className="flex rounded-lg border border-slate-600 overflow-hidden">
+                {TIME_RANGES.map((range) => (
+                  <button
+                    key={range.value}
+                    onClick={() => handleTimeRangeChange(range.value)}
+                    className={`px-2.5 py-1 text-xs font-medium transition-colors ${
+                      timeRange === range.value
+                        ? "bg-indigo-600 text-white"
+                        : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                    }`}
+                  >
+                    {range.label}
+                  </button>
+                ))}
+              </div>
+              {/* Custom date range button */}
+              <div className="relative">
                 <button
-                  key={range.value}
-                  onClick={() => setTimeRange(range.value)}
-                  className={`px-2.5 py-1 text-xs font-medium transition-colors ${
-                    timeRange === range.value
-                      ? "bg-indigo-600 text-white"
-                      : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                  onClick={() => setShowDatePicker(!showDatePicker)}
+                  className={`px-2.5 py-1 text-xs font-medium rounded-lg border transition-colors ${
+                    timeRange === "custom"
+                      ? "bg-indigo-600 text-white border-indigo-600"
+                      : "bg-slate-800 text-slate-300 border-slate-600 hover:bg-slate-700"
                   }`}
                 >
-                  {range.label}
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
                 </button>
-              ))}
+                {showDatePicker && (
+                  <div className="absolute right-0 top-full mt-2 bg-slate-800 rounded-lg shadow-lg border border-slate-600 p-4 z-10 min-w-[280px]">
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-xs font-medium text-slate-300 mb-1">Start Date</label>
+                        <input
+                          type="date"
+                          value={customStartDate}
+                          onChange={(e) => setCustomStartDate(e.target.value)}
+                          className="w-full px-3 py-2 border border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-300 mb-1">End Date</label>
+                        <input
+                          type="date"
+                          value={customEndDate}
+                          onChange={(e) => setCustomEndDate(e.target.value)}
+                          className="w-full px-3 py-2 border border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        />
+                      </div>
+                      <button
+                        onClick={applyCustomDateRange}
+                        disabled={!customStartDate || !customEndDate}
+                        className="w-full px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Apply Range
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
