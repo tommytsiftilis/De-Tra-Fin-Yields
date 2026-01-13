@@ -170,10 +170,6 @@ export default function Home() {
                 (TradFi rates)
               </p>
             </div>
-            <div className="flex items-center gap-4 text-sm text-slate-500">
-              <span>Auto-refresh: 5 min</span>
-              <span>API cache: 1 hour</span>
-            </div>
           </div>
           <p className="mt-4 text-xs text-slate-500">
             This dashboard is for informational purposes only. DeFi yields

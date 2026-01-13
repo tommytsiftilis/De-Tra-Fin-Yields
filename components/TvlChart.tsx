@@ -181,16 +181,8 @@ export default function TvlChart({
       }
     }
 
-    // Sample for performance (show every Nth day based on range)
-    let sampleInterval = 1;
-    if (filteredDates.length > 90) sampleInterval = 7;
-    else if (filteredDates.length > 30) sampleInterval = 3;
-
-    const sampledDates = filteredDates.filter(
-      (_, i) => i % sampleInterval === 0 || i === filteredDates.length - 1
-    );
-
-    return sampledDates.map((date) => dateMap.get(date)!);
+    // No sampling - show daily granularity like SpreadChart
+    return filteredDates.map((date) => dateMap.get(date)!);
   }, [data, timeRange, customStartDate, customEndDate]);
 
   // Calculate total TVL for visible pools only (from latest data point)
@@ -213,11 +205,14 @@ export default function TvlChart({
       <div className="p-4 border-b border-slate-700">
         <div className="flex flex-col gap-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="border-l-4 border-cyan-500 pl-3">
-              <h2 className="text-xl font-semibold tracking-tight text-white">
-                DeFi Total Value Locked
-              </h2>
-              <p className="text-sm text-slate-400 mt-0.5">
+            <div>
+              <div className="flex items-center gap-2 border-l-4 border-cyan-500 pl-3">
+                <span className="w-2 h-2 rounded-full bg-cyan-500"></span>
+                <h2 className="text-xl font-semibold tracking-tight text-white">
+                  DeFi Total Value Locked
+                </h2>
+              </div>
+              <p className="text-sm text-slate-400 mt-0.5 pl-3 ml-1">
                 Capital deposited in tracked lending pools
               </p>
             </div>
