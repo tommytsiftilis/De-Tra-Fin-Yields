@@ -14,6 +14,48 @@ interface RateRow {
   apy: number;
   vsFedFunds: number;
   type: "defi" | "tradfi";
+  description: string;
+}
+
+function TrendIndicator({ value }: { value: number }) {
+  if (value === 0) {
+    return <span className="text-gray-400">--</span>;
+  }
+
+  const isPositive = value > 0;
+  return (
+    <span
+      className={`inline-flex items-center gap-1 font-mono ${
+        isPositive ? "text-emerald-600" : "text-red-600"
+      }`}
+    >
+      {isPositive ? (
+        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+        </svg>
+      ) : (
+        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+        </svg>
+      )}
+      {isPositive ? "+" : ""}
+      {formatPercent(value)}
+    </span>
+  );
+}
+
+function TypeBadge({ type }: { type: "defi" | "tradfi" }) {
+  return (
+    <span
+      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+        type === "defi"
+          ? "bg-indigo-100 text-indigo-700"
+          : "bg-amber-100 text-amber-700"
+      }`}
+    >
+      {type === "defi" ? "DeFi" : "TradFi"}
+    </span>
+  );
 }
 
 export default function RatesTable({ rates, isLoading }: RatesTableProps) {
@@ -25,6 +67,7 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
           apy: rates.defi.aaveUsdc,
           vsFedFunds: rates.defi.aaveUsdc - rates.tradfi.fedFunds,
           type: "defi",
+          description: "Variable supply APY on Ethereum mainnet",
         },
         {
           asset: "USDT",
@@ -32,6 +75,7 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
           apy: rates.defi.aaveUsdt,
           vsFedFunds: rates.defi.aaveUsdt - rates.tradfi.fedFunds,
           type: "defi",
+          description: "Variable supply APY on Ethereum mainnet",
         },
         {
           asset: "USDC",
@@ -39,6 +83,7 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
           apy: rates.defi.compoundUsdc,
           vsFedFunds: rates.defi.compoundUsdc - rates.tradfi.fedFunds,
           type: "defi",
+          description: "Base supply APY on Ethereum mainnet",
         },
         {
           asset: "USD",
@@ -46,6 +91,7 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
           apy: rates.tradfi.fedFunds,
           vsFedFunds: 0,
           type: "tradfi",
+          description: "Overnight interbank lending rate (risk-free benchmark)",
         },
         {
           asset: "USD",
@@ -53,82 +99,135 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
           apy: rates.tradfi.tbill,
           vsFedFunds: rates.tradfi.tbill - rates.tradfi.fedFunds,
           type: "tradfi",
+          description: "US Treasury Bill yield (virtually risk-free)",
         },
       ]
     : [];
 
+  // Find best DeFi rate
+  const bestDefiApy = rates
+    ? Math.max(rates.defi.aaveUsdc, rates.defi.aaveUsdt, rates.defi.compoundUsdc)
+    : 0;
+
   return (
-    <div className="border rounded-lg p-4 bg-white overflow-x-auto">
-      <h2 className="text-xl font-semibold mb-4">Current Rates</h2>
-      <table className="w-full min-w-[500px]">
-        <thead>
-          <tr className="text-left border-b">
-            <th className="pb-2 font-medium text-gray-600">Asset</th>
-            <th className="pb-2 font-medium text-gray-600">Protocol</th>
-            <th className="pb-2 font-medium text-gray-600 text-right">
-              Current APY
-            </th>
-            <th className="pb-2 font-medium text-gray-600 text-right">
-              vs Fed Funds
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {isLoading ? (
-            // Loading skeleton
-            Array.from({ length: 5 }).map((_, i) => (
-              <tr key={i} className="border-b last:border-b-0">
-                <td className="py-3">
-                  <div className="h-4 w-16 bg-gray-200 animate-pulse rounded" />
-                </td>
-                <td className="py-3">
-                  <div className="h-4 w-24 bg-gray-200 animate-pulse rounded" />
-                </td>
-                <td className="py-3 text-right">
-                  <div className="h-4 w-16 bg-gray-200 animate-pulse rounded ml-auto" />
-                </td>
-                <td className="py-3 text-right">
-                  <div className="h-4 w-16 bg-gray-200 animate-pulse rounded ml-auto" />
-                </td>
-              </tr>
-            ))
-          ) : rows.length === 0 ? (
-            <tr>
-              <td colSpan={4} className="py-8 text-center text-gray-400">
-                No data available
-              </td>
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="p-4 border-b border-gray-200">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Current Rates</h2>
+            <p className="text-sm text-gray-500 mt-0.5">
+              Live yields from DeFi protocols and traditional finance
+            </p>
+          </div>
+          <div className="flex items-center gap-4 text-xs">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
+              DeFi
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+              TradFi
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[600px]">
+          <thead>
+            <tr className="bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3">Type</th>
+              <th className="px-4 py-3">Asset</th>
+              <th className="px-4 py-3">Protocol / Rate</th>
+              <th className="px-4 py-3 text-right">Current APY</th>
+              <th className="px-4 py-3 text-right">vs Risk-Free</th>
             </tr>
-          ) : (
-            rows.map((row, i) => (
-              <tr
-                key={i}
-                className={`border-b last:border-b-0 ${
-                  row.type === "tradfi" ? "bg-gray-50" : ""
-                }`}
-              >
-                <td className="py-3 font-medium">{row.asset}</td>
-                <td className="py-3 text-gray-600">{row.protocol}</td>
-                <td className="py-3 text-right font-mono">
-                  {formatPercent(row.apy)}
-                </td>
-                <td
-                  className={`py-3 text-right font-mono ${
-                    row.vsFedFunds > 0
-                      ? "text-green-600"
-                      : row.vsFedFunds < 0
-                        ? "text-red-600"
-                        : "text-gray-400"
-                  }`}
-                >
-                  {row.vsFedFunds === 0
-                    ? "--"
-                    : `${row.vsFedFunds > 0 ? "+" : ""}${formatPercent(row.vsFedFunds)}`}
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {isLoading ? (
+              // Loading skeleton
+              Array.from({ length: 5 }).map((_, i) => (
+                <tr key={i}>
+                  <td className="px-4 py-4">
+                    <div className="h-5 w-12 bg-gray-200 animate-pulse rounded-full" />
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="h-4 w-12 bg-gray-200 animate-pulse rounded" />
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="h-4 w-24 bg-gray-200 animate-pulse rounded" />
+                  </td>
+                  <td className="px-4 py-4 text-right">
+                    <div className="h-4 w-16 bg-gray-200 animate-pulse rounded ml-auto" />
+                  </td>
+                  <td className="px-4 py-4 text-right">
+                    <div className="h-4 w-16 bg-gray-200 animate-pulse rounded ml-auto" />
+                  </td>
+                </tr>
+              ))
+            ) : rows.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="px-4 py-12 text-center text-gray-400">
+                  No data available
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              rows.map((row, i) => {
+                const isBestRate = row.type === "defi" && row.apy === bestDefiApy;
+                return (
+                  <tr
+                    key={i}
+                    className={`hover:bg-gray-50 transition-colors ${
+                      isBestRate ? "bg-emerald-50/50" : ""
+                    }`}
+                  >
+                    <td className="px-4 py-4">
+                      <TypeBadge type={row.type} />
+                    </td>
+                    <td className="px-4 py-4">
+                      <span className="font-medium text-gray-900">{row.asset}</span>
+                    </td>
+                    <td className="px-4 py-4">
+                      <div>
+                        <span className="text-gray-900 font-medium">
+                          {row.protocol}
+                        </span>
+                        {isBestRate && (
+                          <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-700">
+                            Best
+                          </span>
+                        )}
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {row.description}
+                        </p>
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 text-right">
+                      <span
+                        className={`text-lg font-mono font-semibold ${
+                          row.type === "defi" ? "text-indigo-600" : "text-amber-600"
+                        }`}
+                      >
+                        {formatPercent(row.apy)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 text-right">
+                      <TrendIndicator value={row.vsFedFunds} />
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
+        <p className="text-xs text-gray-500">
+          <span className="font-medium">Understanding the comparison:</span> DeFi rates fluctuate based on supply/demand.
+          TradFi rates are set by the Federal Reserve. A positive spread means DeFi offers higher yields but with smart contract and protocol risks.
+        </p>
+      </div>
     </div>
   );
 }

@@ -24,7 +24,7 @@ interface UtilizationChartProps {
   isLoading?: boolean;
 }
 
-const COLORS = {
+const COLORS: Record<string, string> = {
   "aave-v3-USDC": "#6366f1",
   "aave-v3-USDT": "#8b5cf6",
   "compound-v3-USDC": "#06b6d4",
@@ -71,69 +71,126 @@ export default function UtilizationChart({
     }
   }
 
+  // Calculate total TVL for the latest date
+  const latestData = mergedData[mergedData.length - 1];
+  const totalTvl = latestData
+    ? Object.entries(latestData)
+        .filter(([key]) => key !== "date")
+        .reduce((sum, [, value]) => sum + (typeof value === "number" ? value : 0), 0)
+    : 0;
+
   const pools = data || [];
 
   return (
-    <div className="border rounded-lg p-4 bg-white">
-      <h2 className="text-xl font-semibold mb-4">DeFi Total Value Locked</h2>
-      <div className="h-64">
-        {isLoading ? (
-          <div className="h-full flex items-center justify-center">
-            <div className="animate-pulse text-gray-400">Loading chart...</div>
+    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="p-4 border-b border-gray-200">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">
+              DeFi Total Value Locked
+            </h2>
+            <p className="text-sm text-gray-500 mt-0.5">
+              Capital deposited in tracked lending pools
+            </p>
           </div>
-        ) : mergedData.length === 0 ? (
-          <div className="h-full flex items-center justify-center text-gray-400">
-            No data available
+          <div className="text-right">
+            <p className="text-2xl font-bold text-gray-900">{formatTvl(totalTvl)}</p>
+            <p className="text-xs text-gray-500">Current Total TVL</p>
           </div>
-        ) : (
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
-              data={mergedData}
-              margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis
-                dataKey="date"
-                tickFormatter={(date) => formatShortDate(date)}
-                tick={{ fontSize: 12 }}
-                stroke="#9ca3af"
-              />
-              <YAxis
-                tickFormatter={formatTvl}
-                tick={{ fontSize: 12 }}
-                stroke="#9ca3af"
-              />
-              <Tooltip
-                formatter={(value: number) => [formatTvl(value)]}
-                labelFormatter={(label) => formatShortDate(label)}
-                contentStyle={{
-                  backgroundColor: "white",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "8px",
-                }}
-              />
-              <Legend />
-              {pools.map((pool) => {
-                const key = `${pool.project}-${pool.symbol}`;
-                const color =
-                  COLORS[key as keyof typeof COLORS] || "#9ca3af";
-                const name = `${pool.project === "aave-v3" ? "Aave" : "Compound"} ${pool.symbol}`;
-                return (
-                  <Area
-                    key={key}
-                    type="monotone"
-                    dataKey={key}
-                    name={name}
-                    stroke={color}
-                    fill={color}
-                    fillOpacity={0.3}
-                    stackId="1"
-                  />
-                );
-              })}
-            </AreaChart>
-          </ResponsiveContainer>
-        )}
+        </div>
+      </div>
+
+      <div className="p-4">
+        <div className="h-64">
+          {isLoading ? (
+            <div className="h-full flex items-center justify-center">
+              <div className="animate-pulse text-gray-400">Loading chart...</div>
+            </div>
+          ) : mergedData.length === 0 ? (
+            <div className="h-full flex items-center justify-center text-gray-400">
+              No data available
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={mergedData}
+                margin={{ top: 10, right: 30, left: 0, bottom: 5 }}
+              >
+                <defs>
+                  {pools.map((pool) => {
+                    const key = `${pool.project}-${pool.symbol}`;
+                    const color = COLORS[key] || "#9ca3af";
+                    return (
+                      <linearGradient
+                        key={key}
+                        id={`gradient-${key}`}
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop offset="5%" stopColor={color} stopOpacity={0.4} />
+                        <stop offset="95%" stopColor={color} stopOpacity={0.05} />
+                      </linearGradient>
+                    );
+                  })}
+                </defs>
+
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={(date) => formatShortDate(date)}
+                  tick={{ fontSize: 11, fill: "#6b7280" }}
+                  stroke="#d1d5db"
+                  tickLine={false}
+                />
+                <YAxis
+                  tickFormatter={formatTvl}
+                  tick={{ fontSize: 11, fill: "#6b7280" }}
+                  stroke="#d1d5db"
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <Tooltip
+                  formatter={(value: number) => [formatTvl(value)]}
+                  labelFormatter={(label) => formatShortDate(label)}
+                  contentStyle={{
+                    backgroundColor: "white",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                  }}
+                />
+                <Legend verticalAlign="top" height={36} />
+
+                {pools.map((pool) => {
+                  const key = `${pool.project}-${pool.symbol}`;
+                  const color = COLORS[key] || "#9ca3af";
+                  const name = `${pool.project === "aave-v3" ? "Aave" : "Compound"} ${pool.symbol}`;
+                  return (
+                    <Area
+                      key={key}
+                      type="monotone"
+                      dataKey={key}
+                      name={name}
+                      stroke={color}
+                      fill={`url(#gradient-${key})`}
+                      strokeWidth={2}
+                      stackId="1"
+                    />
+                  );
+                })}
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </div>
+
+      <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
+        <p className="text-xs text-gray-500">
+          <span className="font-medium">Why TVL matters:</span> Higher TVL generally indicates more trust in a protocol.
+          TVL changes can also affect yields - more deposits typically lower rates as supply increases.
+        </p>
       </div>
     </div>
   );

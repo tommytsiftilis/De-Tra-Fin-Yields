@@ -2,6 +2,7 @@
 
 import useSWR from "swr";
 import Header from "@/components/Header";
+import HeroSection from "@/components/HeroSection";
 import RatesTable from "@/components/RatesTable";
 import SpreadChart from "@/components/SpreadChart";
 import UtilizationChart from "@/components/UtilizationChart";
@@ -47,53 +48,96 @@ export default function Home() {
   const errorMessage = error?.message || data?.error || "Unknown error";
 
   return (
-    <main className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
+    <main className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Header lastUpdated={data?.timestamp} />
 
         {hasError && (
-          <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-700 font-medium">Error loading data</p>
-            <p className="text-red-600 text-sm mt-1">{errorMessage}</p>
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+            <div className="flex gap-3">
+              <svg
+                className="w-5 h-5 text-red-600 flex-shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+              <div>
+                <p className="text-red-700 font-medium">Error loading data</p>
+                <p className="text-red-600 text-sm mt-1">{errorMessage}</p>
+              </div>
+            </div>
           </div>
         )}
 
-        <div className="grid gap-6 mt-6">
-          <MetricsCards metrics={data?.data?.metrics} isLoading={isLoading} />
+        <div className="space-y-6">
+          {/* Hero: Side-by-side DeFi vs TradFi comparison */}
+          <HeroSection rates={data?.data?.currentRates} isLoading={isLoading} />
 
-          <RatesTable rates={data?.data?.currentRates} isLoading={isLoading} />
-
-          <SpreadChart data={data?.data?.timeSeries} isLoading={isLoading} />
-
-          <UtilizationChart
-            data={data?.data?.utilization}
+          {/* Spread metrics with sparklines */}
+          <MetricsCards
+            metrics={data?.data?.metrics}
+            timeSeries={data?.data?.timeSeries}
             isLoading={isLoading}
           />
+
+          {/* Historical yields chart */}
+          <SpreadChart data={data?.data?.timeSeries} isLoading={isLoading} />
+
+          {/* Two-column layout for table and TVL */}
+          <div className="grid lg:grid-cols-2 gap-6">
+            <RatesTable
+              rates={data?.data?.currentRates}
+              isLoading={isLoading}
+            />
+            <UtilizationChart
+              data={data?.data?.utilization}
+              isLoading={isLoading}
+            />
+          </div>
         </div>
 
-        <footer className="mt-8 pt-6 border-t text-center text-sm text-gray-500">
-          <p>
-            Data sources:{" "}
-            <a
-              href="https://defillama.com/yields"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-indigo-600 hover:underline"
-            >
-              DefiLlama
-            </a>{" "}
-            &{" "}
-            <a
-              href="https://fred.stlouisfed.org/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-indigo-600 hover:underline"
-            >
-              FRED
-            </a>
-          </p>
-          <p className="mt-1">
-            Refreshes every 5 minutes. API data cached for 1 hour.
+        {/* Footer */}
+        <footer className="mt-12 pt-8 border-t border-gray-200">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="text-sm text-gray-500">
+              <p>
+                Data sources:{" "}
+                <a
+                  href="https://defillama.com/yields"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-indigo-600 hover:underline"
+                >
+                  DefiLlama
+                </a>{" "}
+                (DeFi yields) &{" "}
+                <a
+                  href="https://fred.stlouisfed.org/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-amber-600 hover:underline"
+                >
+                  FRED
+                </a>{" "}
+                (TradFi rates)
+              </p>
+            </div>
+            <div className="flex items-center gap-4 text-sm text-gray-400">
+              <span>Client refreshes: 5 min</span>
+              <span>API cache: 1 hour</span>
+            </div>
+          </div>
+          <p className="mt-4 text-xs text-gray-400">
+            This dashboard is for informational purposes only. DeFi yields
+            involve smart contract risk and are not equivalent to FDIC-insured
+            deposits or government securities.
           </p>
         </footer>
       </div>
