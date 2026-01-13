@@ -44,7 +44,7 @@ function TrendIndicator({ value, baseRate }: { value: number; baseRate: number }
 }
 
 export default function RatesTable({ rates, isLoading }: RatesTableProps) {
-  const [riskFreeBase, setRiskFreeBase] = useState<RiskFreeBase>("fedFunds");
+  const [riskFreeBase, setRiskFreeBase] = useState<RiskFreeBase>("tbill");
 
   const baseRate = rates
     ? riskFreeBase === "fedFunds"

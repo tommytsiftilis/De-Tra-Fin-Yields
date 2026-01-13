@@ -53,7 +53,7 @@ const fetcher = (url: string) =>
 export default function Home() {
   // Selection state for DeFi and TradFi comparison
   const [selectedDefi, setSelectedDefi] = useState<DefiSelection>("aaveUsdc");
-  const [selectedTradfi, setSelectedTradfi] = useState<TradfiSelection>("fedFunds");
+  const [selectedTradfi, setSelectedTradfi] = useState<TradfiSelection>("tbill");
 
   const { data, error, isLoading } = useSWR<SpreadApiResponse>(
     "/api/spread",
