@@ -130,7 +130,7 @@ export default function HeroSection({
     <div className="bg-slate-800/80 rounded-2xl p-6 md:p-8 border border-slate-600/60 ring-1 ring-slate-700/50 backdrop-blur-sm shadow-sm">
       {/* Title */}
       <div className="text-center mb-6">
-        <p className="text-sm font-medium text-slate-400 uppercase tracking-wide">
+        <p className="text-base font-semibold text-slate-300 uppercase tracking-wide">
           Current Yield Comparison
         </p>
       </div>

@@ -213,8 +213,8 @@ export default function TvlChart({
       <div className="p-4 border-b border-slate-700">
         <div className="flex flex-col gap-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h2 className="text-lg font-semibold text-white">
+            <div className="border-l-4 border-cyan-500 pl-3">
+              <h2 className="text-xl font-semibold tracking-tight text-white">
                 DeFi Total Value Locked
               </h2>
               <p className="text-sm text-slate-400 mt-0.5">

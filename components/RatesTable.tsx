@@ -94,9 +94,9 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 border-l-4 border-indigo-500 pl-3">
                 <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
-                <h2 className="text-lg font-semibold text-slate-100">DeFi Stablecoin Yields</h2>
+                <h2 className="text-xl font-semibold text-slate-100 tracking-tight">DeFi Stablecoin Yields</h2>
               </div>
               <p className="text-sm text-slate-400 mt-0.5">
                 Current lending rates from decentralized protocols
