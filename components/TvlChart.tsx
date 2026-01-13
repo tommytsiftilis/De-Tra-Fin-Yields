@@ -299,14 +299,14 @@ export default function TvlChart({
                   {pool.name}
                 </ToggleButton>
               ))}
+            </div>
+
+            {/* Time range selector + All/None */}
+            <div className="flex items-center gap-2">
               <div className="flex items-center gap-1 bg-slate-700/50 rounded-lg p-0.5">
                 <button onClick={selectAll} className="px-2 py-0.5 text-xs font-medium text-slate-300 hover:bg-slate-600 rounded transition-colors">All</button>
                 <button onClick={selectNone} className="px-2 py-0.5 text-xs font-medium text-slate-300 hover:bg-slate-600 rounded transition-colors">None</button>
               </div>
-            </div>
-
-            {/* Time range selector */}
-            <div className="flex items-center gap-2">
               <div className="flex rounded-lg border border-slate-600 overflow-hidden">
                 {TIME_RANGES.map((range) => (
                   <button
