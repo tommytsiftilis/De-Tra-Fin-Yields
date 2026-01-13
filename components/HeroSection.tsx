@@ -2,18 +2,56 @@
 
 import { formatPercent } from "@/lib/utils";
 import { CurrentRates } from "@/types";
+import { DefiSelection, TradfiSelection } from "@/app/page";
 
 interface HeroSectionProps {
   rates?: CurrentRates;
   isLoading?: boolean;
+  selectedDefi: DefiSelection;
+  selectedTradfi: TradfiSelection;
+  onDefiChange: (selection: DefiSelection) => void;
+  onTradfiChange: (selection: TradfiSelection) => void;
 }
 
-function getBestDefiRate(rates: CurrentRates): number {
-  return Math.max(
-    rates.defi.aaveUsdc,
-    rates.defi.aaveUsdt,
-    rates.defi.compoundUsdc
-  );
+const DEFI_OPTIONS: { value: DefiSelection; label: string; protocol: string }[] = [
+  { value: "aaveUsdc", label: "USDC", protocol: "Aave V3" },
+  { value: "aaveUsdt", label: "USDT", protocol: "Aave V3" },
+  { value: "compoundUsdc", label: "USDC", protocol: "Compound V3" },
+];
+
+const TRADFI_OPTIONS: { value: TradfiSelection; label: string; description: string }[] = [
+  { value: "fedFunds", label: "Fed Funds Rate", description: "Overnight rate" },
+  { value: "tbill", label: "3-Month T-Bill", description: "Treasury yield" },
+];
+
+function getDefiRate(rates: CurrentRates, selection: DefiSelection): number {
+  switch (selection) {
+    case "aaveUsdc":
+      return rates.defi.aaveUsdc;
+    case "aaveUsdt":
+      return rates.defi.aaveUsdt;
+    case "compoundUsdc":
+      return rates.defi.compoundUsdc;
+  }
+}
+
+function getTradfiRate(rates: CurrentRates, selection: TradfiSelection): number {
+  switch (selection) {
+    case "fedFunds":
+      return rates.tradfi.fedFunds;
+    case "tbill":
+      return rates.tradfi.tbill;
+  }
+}
+
+function getDefiLabel(selection: DefiSelection): { asset: string; protocol: string } {
+  const option = DEFI_OPTIONS.find((o) => o.value === selection);
+  return { asset: option?.label || "USDC", protocol: option?.protocol || "Aave V3" };
+}
+
+function getTradfiLabel(selection: TradfiSelection): string {
+  const option = TRADFI_OPTIONS.find((o) => o.value === selection);
+  return option?.label || "Fed Funds Rate";
 }
 
 function Skeleton({ className }: { className?: string }) {
@@ -22,11 +60,68 @@ function Skeleton({ className }: { className?: string }) {
   );
 }
 
-export default function HeroSection({ rates, isLoading }: HeroSectionProps) {
-  const bestDefiRate = rates ? getBestDefiRate(rates) : 0;
-  const riskFreeRate = rates?.tradfi.fedFunds || 0;
-  const spread = bestDefiRate - riskFreeRate;
-  const spreadPercent = riskFreeRate > 0 ? (spread / riskFreeRate) * 100 : 0;
+function SelectButton({
+  options,
+  value,
+  onChange,
+  colorClass,
+}: {
+  options: { value: string; label: string; sublabel?: string }[];
+  value: string;
+  onChange: (value: string) => void;
+  colorClass: string;
+}) {
+  return (
+    <div className="relative inline-block">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={`appearance-none bg-white border border-gray-200 rounded-lg px-3 py-1.5 pr-8 text-sm font-medium cursor-pointer hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-1 ${colorClass}`}
+      >
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}{opt.sublabel ? ` (${opt.sublabel})` : ""}
+          </option>
+        ))}
+      </select>
+      <svg
+        className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none text-gray-400"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+      </svg>
+    </div>
+  );
+}
+
+export default function HeroSection({
+  rates,
+  isLoading,
+  selectedDefi,
+  selectedTradfi,
+  onDefiChange,
+  onTradfiChange,
+}: HeroSectionProps) {
+  const defiRate = rates ? getDefiRate(rates, selectedDefi) : 0;
+  const tradfiRate = rates ? getTradfiRate(rates, selectedTradfi) : 0;
+  const spread = defiRate - tradfiRate;
+  const spreadPercent = tradfiRate > 0 ? (spread / tradfiRate) * 100 : 0;
+  const defiLabel = getDefiLabel(selectedDefi);
+  const tradfiLabel = getTradfiLabel(selectedTradfi);
+
+  const defiSelectOptions = DEFI_OPTIONS.map((o) => ({
+    value: o.value,
+    label: o.label,
+    sublabel: o.protocol,
+  }));
+
+  const tradfiSelectOptions = TRADFI_OPTIONS.map((o) => ({
+    value: o.value,
+    label: o.label,
+    sublabel: o.description,
+  }));
 
   return (
     <div className="bg-gradient-to-r from-indigo-50 via-white to-amber-50 rounded-2xl p-6 md:p-8 border border-gray-200 shadow-sm">
@@ -42,19 +137,30 @@ export default function HeroSection({ rates, isLoading }: HeroSectionProps) {
         {/* DeFi Side */}
         <div className="text-center md:text-right">
           <div className="inline-block">
-            <p className="text-sm font-medium text-indigo-600 mb-1 flex items-center justify-center md:justify-end gap-2">
+            <div className="flex items-center justify-center md:justify-end gap-2 mb-2">
               <span className="w-3 h-3 rounded-full bg-indigo-500"></span>
-              DeFi Stablecoins
-            </p>
+              <span className="text-sm font-medium text-indigo-600">DeFi Stablecoin</span>
+            </div>
+
+            {/* DeFi selector */}
+            <div className="mb-3">
+              <SelectButton
+                options={defiSelectOptions}
+                value={selectedDefi}
+                onChange={(v) => onDefiChange(v as DefiSelection)}
+                colorClass="text-indigo-700 focus:ring-indigo-500"
+              />
+            </div>
+
             {isLoading ? (
               <Skeleton className="h-12 w-32 mx-auto md:ml-auto md:mr-0" />
             ) : (
               <p className="text-4xl md:text-5xl font-bold text-gray-900">
-                {formatPercent(bestDefiRate)}
+                {formatPercent(defiRate)}
               </p>
             )}
             <p className="text-xs text-gray-500 mt-1">
-              Best available yield (Aave/Compound)
+              {defiLabel.asset} on {defiLabel.protocol}
             </p>
           </div>
         </div>
@@ -119,19 +225,30 @@ export default function HeroSection({ rates, isLoading }: HeroSectionProps) {
         {/* TradFi Side */}
         <div className="text-center md:text-left">
           <div className="inline-block">
-            <p className="text-sm font-medium text-amber-600 mb-1 flex items-center justify-center md:justify-start gap-2">
+            <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
               <span className="w-3 h-3 rounded-full bg-amber-500"></span>
-              TradFi Risk-Free
-            </p>
+              <span className="text-sm font-medium text-amber-600">TradFi Risk-Free</span>
+            </div>
+
+            {/* TradFi selector */}
+            <div className="mb-3">
+              <SelectButton
+                options={tradfiSelectOptions}
+                value={selectedTradfi}
+                onChange={(v) => onTradfiChange(v as TradfiSelection)}
+                colorClass="text-amber-700 focus:ring-amber-500"
+              />
+            </div>
+
             {isLoading ? (
               <Skeleton className="h-12 w-32 mx-auto md:mr-auto md:ml-0" />
             ) : (
               <p className="text-4xl md:text-5xl font-bold text-gray-900">
-                {formatPercent(riskFreeRate)}
+                {formatPercent(tradfiRate)}
               </p>
             )}
             <p className="text-xs text-gray-500 mt-1">
-              Fed Funds Rate (overnight)
+              {tradfiLabel}
             </p>
           </div>
         </div>
@@ -140,8 +257,8 @@ export default function HeroSection({ rates, isLoading }: HeroSectionProps) {
       {/* Context footer */}
       <div className="mt-6 pt-4 border-t border-gray-200">
         <p className="text-xs text-gray-500 text-center">
-          <span className="font-medium">What this means:</span> DeFi stablecoin
-          lending currently offers{" "}
+          <span className="font-medium">What this means:</span> {defiLabel.asset} on {defiLabel.protocol}{" "}
+          currently offers{" "}
           {spread >= 0 ? (
             <span className="text-emerald-600 font-medium">
               {formatPercent(Math.abs(spread))} more
@@ -151,8 +268,7 @@ export default function HeroSection({ rates, isLoading }: HeroSectionProps) {
               {formatPercent(Math.abs(spread))} less
             </span>
           )}{" "}
-          yield than the Federal Reserve&apos;s risk-free rate. This spread
-          reflects the additional risk/reward of decentralized protocols.
+          yield than {tradfiLabel}. This spread reflects the additional risk/reward of decentralized protocols.
         </p>
       </div>
     </div>

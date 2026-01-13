@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import useSWR from "swr";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
@@ -8,6 +9,9 @@ import SpreadChart from "@/components/SpreadChart";
 import UtilizationChart from "@/components/UtilizationChart";
 import MetricsCards from "@/components/MetricsCards";
 import { SpreadDataPoint, SpreadMetrics, CurrentRates } from "@/types";
+
+export type DefiSelection = "aaveUsdc" | "aaveUsdt" | "compoundUsdc";
+export type TradfiSelection = "fedFunds" | "tbill";
 
 interface SpreadApiResponse {
   success: boolean;
@@ -35,6 +39,10 @@ const fetcher = (url: string) =>
   });
 
 export default function Home() {
+  // Selection state for DeFi and TradFi comparison
+  const [selectedDefi, setSelectedDefi] = useState<DefiSelection>("aaveUsdc");
+  const [selectedTradfi, setSelectedTradfi] = useState<TradfiSelection>("fedFunds");
+
   const { data, error, isLoading } = useSWR<SpreadApiResponse>(
     "/api/spread",
     fetcher,
@@ -49,30 +57,8 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      {/* Top bar with last updated */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex justify-end">
-          {data?.timestamp ? (
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-              <span>
-                Last updated:{" "}
-                {new Date(data.timestamp).toLocaleString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  hour: "numeric",
-                  minute: "2-digit",
-                })}
-              </span>
-            </div>
-          ) : (
-            <div className="h-5" />
-          )}
-        </div>
-      </div>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Header />
+        <Header timestamp={data?.timestamp} />
 
         {hasError && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
@@ -100,17 +86,31 @@ export default function Home() {
 
         <div className="space-y-6">
           {/* Hero: Side-by-side DeFi vs TradFi comparison */}
-          <HeroSection rates={data?.data?.currentRates} isLoading={isLoading} />
+          <HeroSection
+            rates={data?.data?.currentRates}
+            isLoading={isLoading}
+            selectedDefi={selectedDefi}
+            selectedTradfi={selectedTradfi}
+            onDefiChange={setSelectedDefi}
+            onTradfiChange={setSelectedTradfi}
+          />
 
           {/* Spread metrics with sparklines */}
           <MetricsCards
             metrics={data?.data?.metrics}
             timeSeries={data?.data?.timeSeries}
             isLoading={isLoading}
+            selectedDefi={selectedDefi}
+            selectedTradfi={selectedTradfi}
           />
 
           {/* Historical yields chart */}
-          <SpreadChart data={data?.data?.timeSeries} isLoading={isLoading} />
+          <SpreadChart
+            data={data?.data?.timeSeries}
+            isLoading={isLoading}
+            selectedDefi={selectedDefi}
+            selectedTradfi={selectedTradfi}
+          />
 
           {/* Two-column layout for table and TVL */}
           <div className="grid lg:grid-cols-2 gap-6">

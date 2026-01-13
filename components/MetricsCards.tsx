@@ -1,7 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import { formatPercent, formatDate } from "@/lib/utils";
 import { SpreadMetrics, SpreadDataPoint } from "@/types";
+import { DefiSelection, TradfiSelection } from "@/app/page";
 import {
   LineChart,
   Line,
@@ -13,6 +15,90 @@ interface MetricsCardsProps {
   metrics?: SpreadMetrics;
   timeSeries?: SpreadDataPoint[];
   isLoading?: boolean;
+  selectedDefi: DefiSelection;
+  selectedTradfi: TradfiSelection;
+}
+
+// Map selection to data key
+function getDefiKey(selection: DefiSelection): keyof SpreadDataPoint {
+  switch (selection) {
+    case "aaveUsdc":
+      return "aaveUsdcApy";
+    case "aaveUsdt":
+      return "aaveUsdtApy";
+    case "compoundUsdc":
+      return "compoundUsdcApy";
+  }
+}
+
+function getTradfiKey(selection: TradfiSelection): keyof SpreadDataPoint {
+  switch (selection) {
+    case "fedFunds":
+      return "fedFundsRate";
+    case "tbill":
+      return "tbillRate";
+  }
+}
+
+function getDefiLabel(selection: DefiSelection): string {
+  switch (selection) {
+    case "aaveUsdc":
+      return "Aave USDC";
+    case "aaveUsdt":
+      return "Aave USDT";
+    case "compoundUsdc":
+      return "Compound USDC";
+  }
+}
+
+function getTradfiLabel(selection: TradfiSelection): string {
+  switch (selection) {
+    case "fedFunds":
+      return "Fed Funds";
+    case "tbill":
+      return "3M T-Bill";
+  }
+}
+
+// Compute metrics for the selected pair
+function computeSelectedMetrics(
+  timeSeries: SpreadDataPoint[],
+  defiKey: keyof SpreadDataPoint,
+  tradfiKey: keyof SpreadDataPoint
+) {
+  if (!timeSeries || timeSeries.length === 0) {
+    return null;
+  }
+
+  // Add computed spread to each point
+  const dataWithSpread = timeSeries.map((point) => ({
+    ...point,
+    computedSpread: (point[defiKey] as number) - (point[tradfiKey] as number),
+  }));
+
+  const spreads = dataWithSpread.map((d) => d.computedSpread);
+  const currentSpread = spreads[spreads.length - 1];
+  const averageSpread = spreads.reduce((a, b) => a + b, 0) / spreads.length;
+
+  let maxSpread = { value: spreads[0], date: dataWithSpread[0].date };
+  let minSpread = { value: spreads[0], date: dataWithSpread[0].date };
+
+  for (let i = 0; i < spreads.length; i++) {
+    if (spreads[i] > maxSpread.value) {
+      maxSpread = { value: spreads[i], date: dataWithSpread[i].date };
+    }
+    if (spreads[i] < minSpread.value) {
+      minSpread = { value: spreads[i], date: dataWithSpread[i].date };
+    }
+  }
+
+  return {
+    currentSpread,
+    averageSpread,
+    maxSpread,
+    minSpread,
+    dataWithSpread,
+  };
 }
 
 function Sparkline({
@@ -21,7 +107,7 @@ function Sparkline({
   color,
   referenceValue,
 }: {
-  data: SpreadDataPoint[];
+  data: Array<Record<string, unknown>>;
   dataKey: string;
   color: string;
   referenceValue?: number;
@@ -65,7 +151,7 @@ function MetricCard({
   description?: string;
   isLoading?: boolean;
   isPositive?: boolean;
-  sparklineData?: SpreadDataPoint[];
+  sparklineData?: Array<Record<string, unknown>>;
   sparklineKey?: string;
   sparklineColor?: string;
   icon?: React.ReactNode;
@@ -121,33 +207,46 @@ export default function MetricsCards({
   metrics,
   timeSeries,
   isLoading,
+  selectedDefi,
+  selectedTradfi,
 }: MetricsCardsProps) {
+  // Compute metrics based on selection
+  const defiKey = getDefiKey(selectedDefi);
+  const tradfiKey = getTradfiKey(selectedTradfi);
+  const defiLabel = getDefiLabel(selectedDefi);
+  const tradfiLabel = getTradfiLabel(selectedTradfi);
+
+  const selectedMetrics = useMemo(() => {
+    if (!timeSeries) return null;
+    return computeSelectedMetrics(timeSeries, defiKey, tradfiKey);
+  }, [timeSeries, defiKey, tradfiKey]);
+
   // Calculate context data
-  const avgSpread = metrics?.averageSpread || 0;
-  const currentSpread = metrics?.currentSpread || 0;
+  const avgSpread = selectedMetrics?.averageSpread || 0;
+  const currentSpread = selectedMetrics?.currentSpread || 0;
   const vsAverage = currentSpread - avgSpread;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <MetricCard
         title="Current Spread"
-        value={metrics ? formatPercent(metrics.currentSpread) : "--"}
+        value={selectedMetrics ? formatPercent(selectedMetrics.currentSpread) : "--"}
         subtitle={
-          metrics
+          selectedMetrics
             ? `${vsAverage >= 0 ? "+" : ""}${formatPercent(vsAverage)} vs avg`
             : undefined
         }
-        description="DeFi yield minus Fed Funds Rate. Positive = DeFi pays more."
+        description={`${defiLabel} minus ${tradfiLabel}. Positive = DeFi pays more.`}
         isLoading={isLoading}
-        isPositive={metrics ? metrics.currentSpread > 0 : undefined}
-        sparklineData={timeSeries}
-        sparklineKey="spreadVsFed"
+        isPositive={selectedMetrics ? selectedMetrics.currentSpread > 0 : undefined}
+        sparklineData={selectedMetrics?.dataWithSpread}
+        sparklineKey="computedSpread"
         sparklineColor={currentSpread >= 0 ? "#10b981" : "#ef4444"}
         icon={
           <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-            metrics && metrics.currentSpread >= 0 ? "bg-emerald-100" : "bg-red-100"
+            selectedMetrics && selectedMetrics.currentSpread >= 0 ? "bg-emerald-100" : "bg-red-100"
           }`}>
-            {metrics && metrics.currentSpread >= 0 ? (
+            {selectedMetrics && selectedMetrics.currentSpread >= 0 ? (
               <svg className="w-3 h-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 10l7-7m0 0l7 7m-7-7v18" />
               </svg>
@@ -162,11 +261,11 @@ export default function MetricsCards({
 
       <MetricCard
         title="18-Month Average"
-        value={metrics ? formatPercent(metrics.averageSpread) : "--"}
+        value={selectedMetrics ? formatPercent(selectedMetrics.averageSpread) : "--"}
         subtitle="Historical benchmark"
-        description="Long-term average spread. Use this to assess if current spread is attractive."
+        description={`Long-term average spread for ${defiLabel} vs ${tradfiLabel}.`}
         isLoading={isLoading}
-        isPositive={metrics ? metrics.averageSpread > 0 : undefined}
+        isPositive={selectedMetrics ? selectedMetrics.averageSpread > 0 : undefined}
         icon={
           <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center">
             <svg className="w-3 h-3 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -178,9 +277,9 @@ export default function MetricsCards({
 
       <MetricCard
         title="Peak Spread"
-        value={metrics ? formatPercent(metrics.maxSpread.value) : "--"}
-        subtitle={metrics?.maxSpread.date ? formatDate(metrics.maxSpread.date) : undefined}
-        description="Highest recorded spread. Occurred during high DeFi demand or low Fed rates."
+        value={selectedMetrics ? formatPercent(selectedMetrics.maxSpread.value) : "--"}
+        subtitle={selectedMetrics?.maxSpread.date ? formatDate(selectedMetrics.maxSpread.date) : undefined}
+        description="Highest recorded spread. Occurred during high DeFi demand or low rates."
         isLoading={isLoading}
         isPositive={true}
         icon={
@@ -194,11 +293,11 @@ export default function MetricsCards({
 
       <MetricCard
         title="Lowest Spread"
-        value={metrics ? formatPercent(metrics.minSpread.value) : "--"}
-        subtitle={metrics?.minSpread.date ? formatDate(metrics.minSpread.date) : undefined}
-        description="Lowest recorded spread. Negative means TradFi paid more than DeFi."
+        value={selectedMetrics ? formatPercent(selectedMetrics.minSpread.value) : "--"}
+        subtitle={selectedMetrics?.minSpread.date ? formatDate(selectedMetrics.minSpread.date) : undefined}
+        description="Lowest recorded spread. Negative means TradFi paid more."
         isLoading={isLoading}
-        isPositive={metrics ? metrics.minSpread.value > 0 : undefined}
+        isPositive={selectedMetrics ? selectedMetrics.minSpread.value > 0 : undefined}
         icon={
           <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center">
             <svg className="w-3 h-3 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">

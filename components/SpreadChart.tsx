@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   XAxis,
   YAxis,
@@ -12,13 +12,17 @@ import {
   ComposedChart,
   ReferenceLine,
   Line,
+  TooltipProps,
 } from "recharts";
 import { SpreadDataPoint } from "@/types";
+import { DefiSelection, TradfiSelection } from "@/app/page";
 import { formatShortDate, formatPercent } from "@/lib/utils";
 
 interface SpreadChartProps {
   data?: SpreadDataPoint[];
   isLoading?: boolean;
+  selectedDefi: DefiSelection;
+  selectedTradfi: TradfiSelection;
 }
 
 type TimeRange = "3m" | "6m" | "1y" | "all";
@@ -44,6 +48,24 @@ const DATA_SERIES: DataSeries[] = [
   { key: "compoundUsdcApy", name: "Compound USDC", color: "#06b6d4", type: "defi" },
   { key: "fedFundsRate", name: "Fed Funds", color: "#f59e0b", type: "tradfi", dashed: true },
   { key: "tbillRate", name: "3M T-Bill", color: "#f97316", type: "tradfi", dashed: true },
+];
+
+// Spread options for comparing different pairs
+interface SpreadOption {
+  id: string;
+  defiKey: string;
+  tradfiKey: string;
+  name: string;
+  color: string;
+}
+
+const SPREAD_OPTIONS: SpreadOption[] = [
+  { id: "aaveUsdc-fedFunds", defiKey: "aaveUsdcApy", tradfiKey: "fedFundsRate", name: "Aave USDC vs Fed Funds", color: "#10b981" },
+  { id: "aaveUsdc-tbill", defiKey: "aaveUsdcApy", tradfiKey: "tbillRate", name: "Aave USDC vs T-Bill", color: "#059669" },
+  { id: "aaveUsdt-fedFunds", defiKey: "aaveUsdtApy", tradfiKey: "fedFundsRate", name: "Aave USDT vs Fed Funds", color: "#8b5cf6" },
+  { id: "aaveUsdt-tbill", defiKey: "aaveUsdtApy", tradfiKey: "tbillRate", name: "Aave USDT vs T-Bill", color: "#7c3aed" },
+  { id: "compoundUsdc-fedFunds", defiKey: "compoundUsdcApy", tradfiKey: "fedFundsRate", name: "Compound USDC vs Fed Funds", color: "#06b6d4" },
+  { id: "compoundUsdc-tbill", defiKey: "compoundUsdcApy", tradfiKey: "tbillRate", name: "Compound USDC vs T-Bill", color: "#0891b2" },
 ];
 
 function ToggleButton({
@@ -82,12 +104,147 @@ function ToggleButton({
   );
 }
 
-export default function SpreadChart({ data, isLoading }: SpreadChartProps) {
+// Custom tooltip that shows spread when comparing two items
+function CustomTooltip({
+  active,
+  payload,
+  label,
+  visibleSeries,
+  visibleSpreads,
+}: TooltipProps<number, string> & {
+  visibleSeries: Set<string>;
+  visibleSpreads: Set<string>;
+}) {
+  if (!active || !payload || payload.length === 0) return null;
+
+  // Get visible rate values
+  const rateValues: { name: string; value: number; color: string; type: "defi" | "tradfi" }[] = [];
+
+  for (const entry of payload) {
+    const series = DATA_SERIES.find((s) => s.key === entry.dataKey);
+    if (series && visibleSeries.has(series.key) && entry.value !== undefined) {
+      rateValues.push({
+        name: series.name,
+        value: entry.value,
+        color: series.color,
+        type: series.type,
+      });
+    }
+  }
+
+  // Calculate spread if exactly one DeFi and one TradFi are selected
+  const defiRates = rateValues.filter((r) => r.type === "defi");
+  const tradfiRates = rateValues.filter((r) => r.type === "tradfi");
+
+  let spreadInfo: { spread: number; defiName: string; tradfiName: string } | null = null;
+  if (defiRates.length === 1 && tradfiRates.length === 1) {
+    spreadInfo = {
+      spread: defiRates[0].value - tradfiRates[0].value,
+      defiName: defiRates[0].name,
+      tradfiName: tradfiRates[0].name,
+    };
+  }
+
+  // Get visible spread values
+  const spreadValues: { name: string; value: number; color: string }[] = [];
+  for (const entry of payload) {
+    const spreadOpt = SPREAD_OPTIONS.find((s) => s.id === entry.dataKey);
+    if (spreadOpt && visibleSpreads.has(spreadOpt.id) && entry.value !== undefined) {
+      spreadValues.push({
+        name: spreadOpt.name,
+        value: entry.value,
+        color: spreadOpt.color,
+      });
+    }
+  }
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3 min-w-[200px]">
+      <p className="text-xs font-medium text-gray-500 mb-2">
+        {formatShortDate(label)}
+      </p>
+
+      {/* Rate values */}
+      {rateValues.length > 0 && (
+        <div className="space-y-1 mb-2">
+          {rateValues.map((rate) => (
+            <div key={rate.name} className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <span
+                  className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: rate.color }}
+                />
+                <span className="text-xs text-gray-600">{rate.name}</span>
+              </div>
+              <span className="text-xs font-mono font-medium text-gray-900">
+                {formatPercent(rate.value)}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Auto-calculated spread for 1:1 comparison */}
+      {spreadInfo && (
+        <div className="border-t border-gray-100 pt-2 mt-2">
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-xs text-gray-500">Spread</span>
+            <span
+              className={`text-xs font-mono font-bold ${
+                spreadInfo.spread >= 0 ? "text-emerald-600" : "text-red-600"
+              }`}
+            >
+              {spreadInfo.spread >= 0 ? "+" : ""}
+              {formatPercent(spreadInfo.spread)}
+            </span>
+          </div>
+          <p className="text-[10px] text-gray-400 mt-0.5">
+            {spreadInfo.defiName} − {spreadInfo.tradfiName}
+          </p>
+        </div>
+      )}
+
+      {/* Explicit spread series values */}
+      {spreadValues.length > 0 && (
+        <div className={`${rateValues.length > 0 ? "border-t border-gray-100 pt-2 mt-2" : ""}`}>
+          <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-1">Spreads</p>
+          {spreadValues.map((spread) => (
+            <div key={spread.name} className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <span
+                  className="w-2 h-2 rounded"
+                  style={{ backgroundColor: spread.color }}
+                />
+                <span className="text-xs text-gray-600">{spread.name}</span>
+              </div>
+              <span
+                className={`text-xs font-mono font-medium ${
+                  spread.value >= 0 ? "text-emerald-600" : "text-red-600"
+                }`}
+              >
+                {spread.value >= 0 ? "+" : ""}
+                {formatPercent(spread.value)}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function SpreadChart({
+  data,
+  isLoading,
+  selectedDefi,
+  selectedTradfi,
+}: SpreadChartProps) {
   const [timeRange, setTimeRange] = useState<TimeRange>("6m");
-  const [showSpreadArea, setShowSpreadArea] = useState(true);
   const [visibleSeries, setVisibleSeries] = useState<Set<string>>(
     new Set(DATA_SERIES.map((s) => s.key))
   );
+  const [visibleSpreads, setVisibleSpreads] = useState<Set<string>>(new Set());
+  const [showSpreadArea, setShowSpreadArea] = useState(false);
 
   const toggleSeries = (key: string) => {
     setVisibleSeries((prev) => {
@@ -101,11 +258,23 @@ export default function SpreadChart({ data, isLoading }: SpreadChartProps) {
     });
   };
 
-  const selectAll = () => {
+  const toggleSpread = (id: string) => {
+    setVisibleSpreads((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const selectAllSeries = () => {
     setVisibleSeries(new Set(DATA_SERIES.map((s) => s.key)));
   };
 
-  const selectNone = () => {
+  const selectNoneSeries = () => {
     setVisibleSeries(new Set());
   };
 
@@ -117,27 +286,48 @@ export default function SpreadChart({ data, isLoading }: SpreadChartProps) {
     setVisibleSeries(new Set(DATA_SERIES.filter((s) => s.type === "tradfi").map((s) => s.key)));
   };
 
-  // Filter data by time range
-  const filteredData = data
-    ? (() => {
-        const range = TIME_RANGES.find((r) => r.value === timeRange);
-        if (!range || range.days === Infinity) return data;
-        const cutoffDate = new Date();
-        cutoffDate.setDate(cutoffDate.getDate() - range.days);
-        return data.filter((d) => new Date(d.date) >= cutoffDate);
-      })()
-    : [];
+  const selectAllSpreads = () => {
+    setVisibleSpreads(new Set(SPREAD_OPTIONS.map((s) => s.id)));
+  };
 
-  // Sample data for performance
-  const sampledData = filteredData.filter(
-    (_, i) => i % 3 === 0 || i === filteredData.length - 1
-  );
+  const selectNoSpreads = () => {
+    setVisibleSpreads(new Set());
+  };
 
-  // Calculate best DeFi rate for spread visualization
-  const chartData = sampledData.map((d) => ({
-    ...d,
-    bestDefiRate: Math.max(d.aaveUsdcApy, d.aaveUsdtApy, d.compoundUsdcApy),
-  }));
+  // Filter data by time range and compute spreads
+  const chartData = useMemo(() => {
+    if (!data) return [];
+
+    const range = TIME_RANGES.find((r) => r.value === timeRange);
+    let filtered = data;
+    if (range && range.days !== Infinity) {
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - range.days);
+      filtered = data.filter((d) => new Date(d.date) >= cutoffDate);
+    }
+
+    // Sample data for performance
+    const sampled = filtered.filter(
+      (_, i) => i % 3 === 0 || i === filtered.length - 1
+    );
+
+    // Add computed spreads
+    return sampled.map((d) => {
+      const spreads: Record<string, number> = {};
+      for (const opt of SPREAD_OPTIONS) {
+        spreads[opt.id] = (d[opt.defiKey as keyof SpreadDataPoint] as number) -
+          (d[opt.tradfiKey as keyof SpreadDataPoint] as number);
+      }
+      return {
+        ...d,
+        ...spreads,
+        // For legacy spread area (based on selected comparison)
+        selectedSpread:
+          (d[`${selectedDefi === "aaveUsdc" ? "aaveUsdcApy" : selectedDefi === "aaveUsdt" ? "aaveUsdtApy" : "compoundUsdcApy"}`] as number) -
+          (d[selectedTradfi === "fedFunds" ? "fedFundsRate" : "tbillRate"] as number),
+      };
+    });
+  }, [data, timeRange, selectedDefi, selectedTradfi]);
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -154,7 +344,7 @@ export default function SpreadChart({ data, isLoading }: SpreadChartProps) {
             </div>
 
             <div className="flex items-center gap-4">
-              {/* Spread toggle */}
+              {/* Spread area toggle */}
               <label className="flex items-center gap-2 text-sm cursor-pointer">
                 <input
                   type="checkbox"
@@ -184,9 +374,9 @@ export default function SpreadChart({ data, isLoading }: SpreadChartProps) {
             </div>
           </div>
 
-          {/* Series toggles */}
+          {/* Rates toggles */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs text-gray-500 mr-1">Show:</span>
+            <span className="text-xs text-gray-500 mr-1">Rates:</span>
             {DATA_SERIES.map((series) => (
               <ToggleButton
                 key={series.key}
@@ -200,14 +390,14 @@ export default function SpreadChart({ data, isLoading }: SpreadChartProps) {
             ))}
             <div className="flex items-center gap-1 ml-2 pl-2 border-l border-gray-200">
               <button
-                onClick={selectAll}
+                onClick={selectAllSeries}
                 className="text-xs text-indigo-600 hover:underline"
               >
                 All
               </button>
               <span className="text-gray-300">|</span>
               <button
-                onClick={selectNone}
+                onClick={selectNoneSeries}
                 className="text-xs text-indigo-600 hover:underline"
               >
                 None
@@ -228,6 +418,36 @@ export default function SpreadChart({ data, isLoading }: SpreadChartProps) {
               </button>
             </div>
           </div>
+
+          {/* Spread series toggles */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-gray-500 mr-1">Spreads:</span>
+            {SPREAD_OPTIONS.map((spread) => (
+              <ToggleButton
+                key={spread.id}
+                active={visibleSpreads.has(spread.id)}
+                onClick={() => toggleSpread(spread.id)}
+                color={spread.color}
+              >
+                {spread.name.replace(" vs ", " - ")}
+              </ToggleButton>
+            ))}
+            <div className="flex items-center gap-1 ml-2 pl-2 border-l border-gray-200">
+              <button
+                onClick={selectAllSpreads}
+                className="text-xs text-indigo-600 hover:underline"
+              >
+                All
+              </button>
+              <span className="text-gray-300">|</span>
+              <button
+                onClick={selectNoSpreads}
+                className="text-xs text-indigo-600 hover:underline"
+              >
+                None
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -241,6 +461,10 @@ export default function SpreadChart({ data, isLoading }: SpreadChartProps) {
             <div className="h-full flex items-center justify-center text-gray-400">
               No data available
             </div>
+          ) : visibleSeries.size === 0 && visibleSpreads.size === 0 ? (
+            <div className="h-full flex items-center justify-center text-gray-400">
+              Select at least one rate or spread to display
+            </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart
@@ -252,6 +476,19 @@ export default function SpreadChart({ data, isLoading }: SpreadChartProps) {
                     <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
                     <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                   </linearGradient>
+                  {SPREAD_OPTIONS.map((spread) => (
+                    <linearGradient
+                      key={spread.id}
+                      id={`gradient-${spread.id}`}
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop offset="5%" stopColor={spread.color} stopOpacity={0.3} />
+                      <stop offset="95%" stopColor={spread.color} stopOpacity={0} />
+                    </linearGradient>
+                  ))}
                 </defs>
 
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -271,17 +508,12 @@ export default function SpreadChart({ data, isLoading }: SpreadChartProps) {
                   domain={["auto", "auto"]}
                 />
                 <Tooltip
-                  formatter={(value: number, name: string) => [
-                    formatPercent(value),
-                    name,
-                  ]}
-                  labelFormatter={(label) => formatShortDate(label)}
-                  contentStyle={{
-                    backgroundColor: "white",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                  }}
+                  content={
+                    <CustomTooltip
+                      visibleSeries={visibleSeries}
+                      visibleSpreads={visibleSpreads}
+                    />
+                  }
                 />
                 <Legend
                   verticalAlign="top"
@@ -292,19 +524,34 @@ export default function SpreadChart({ data, isLoading }: SpreadChartProps) {
                 {/* Reference line at 0 */}
                 <ReferenceLine y={0} stroke="#d1d5db" strokeDasharray="3 3" />
 
-                {/* Spread area (best DeFi minus Fed Funds) */}
+                {/* Spread area based on selected comparison */}
                 {showSpreadArea && (
                   <Area
                     type="monotone"
-                    dataKey="spreadVsFed"
-                    name="Spread"
+                    dataKey="selectedSpread"
+                    name="Selected Spread"
                     fill="url(#spreadGradient)"
                     stroke="#10b981"
                     strokeWidth={0}
                   />
                 )}
 
-                {/* Dynamic lines based on visibility */}
+                {/* Spread lines */}
+                {SPREAD_OPTIONS.map((spread) =>
+                  visibleSpreads.has(spread.id) ? (
+                    <Area
+                      key={spread.id}
+                      type="monotone"
+                      dataKey={spread.id}
+                      name={spread.name}
+                      stroke={spread.color}
+                      fill={`url(#gradient-${spread.id})`}
+                      strokeWidth={2}
+                    />
+                  ) : null
+                )}
+
+                {/* Rate lines */}
                 {DATA_SERIES.map((series) =>
                   visibleSeries.has(series.key) ? (
                     <Line
@@ -341,12 +588,13 @@ export default function SpreadChart({ data, isLoading }: SpreadChartProps) {
             ></span>
             <span className="text-gray-600">TradFi rates (dashed lines)</span>
           </span>
-          {showSpreadArea && (
-            <span className="flex items-center gap-1.5">
-              <span className="w-4 h-3 bg-emerald-500/30 rounded"></span>
-              <span className="text-gray-600">Spread area (DeFi advantage)</span>
-            </span>
-          )}
+          <span className="flex items-center gap-1.5">
+            <span className="w-4 h-3 bg-emerald-500/30 rounded"></span>
+            <span className="text-gray-600">Spread areas</span>
+          </span>
+          <span className="text-gray-400 ml-auto">
+            Tip: Select 1 DeFi + 1 TradFi to see spread in tooltip
+          </span>
         </div>
       </div>
     </div>
