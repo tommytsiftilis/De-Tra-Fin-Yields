@@ -29,6 +29,8 @@ function getDefiKey(selection: DefiSelection): keyof SpreadDataPoint {
       return "aaveUsdtApy";
     case "compoundUsdc":
       return "compoundUsdcApy";
+    case "morphoUsdc":
+      return "morphoUsdcApy";
   }
 }
 
@@ -49,6 +51,8 @@ function getDefiLabel(selection: DefiSelection): string {
       return "Aave USDT";
     case "compoundUsdc":
       return "Compound USDC";
+    case "morphoUsdc":
+      return "Morpho USDC";
   }
 }
 
@@ -70,6 +74,8 @@ function getCurrentDefiRate(rates: CurrentRates, selection: DefiSelection): numb
       return rates.defi.aaveUsdt;
     case "compoundUsdc":
       return rates.defi.compoundUsdc;
+    case "morphoUsdc":
+      return rates.defi.morphoUsdc;
   }
 }
 

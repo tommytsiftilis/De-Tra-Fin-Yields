@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import {
   fetchTrackedPools,
   fetchPoolHistory,
+  TRACKED_POOLS,
 } from "@/lib/defillama";
 import { fetchAllRates } from "@/lib/fred";
 import {
@@ -54,20 +55,24 @@ export async function GET() {
     // Calculate metrics
     const metrics = calculateMetrics(normalizedData);
 
-    // Get current rates for quick reference
+    // Get current rates for quick reference using pool IDs
     const currentRates = {
       defi: {
         aaveUsdc:
           poolsWithHistory.find(
-            (p) => p.project === "aave-v3" && p.symbol === "USDC"
+            (p) => p.poolId === TRACKED_POOLS.AAVE_V3_USDC.poolId
           )?.currentApy || 0,
         aaveUsdt:
           poolsWithHistory.find(
-            (p) => p.project === "aave-v3" && p.symbol === "USDT"
+            (p) => p.poolId === TRACKED_POOLS.AAVE_V3_USDT.poolId
           )?.currentApy || 0,
         compoundUsdc:
           poolsWithHistory.find(
-            (p) => p.project === "compound-v3" && p.symbol === "USDC"
+            (p) => p.poolId === TRACKED_POOLS.COMPOUND_V3_USDC.poolId
+          )?.currentApy || 0,
+        morphoUsdc:
+          poolsWithHistory.find(
+            (p) => p.poolId === TRACKED_POOLS.MORPHO_USDC.poolId
           )?.currentApy || 0,
       },
       tradfi: {

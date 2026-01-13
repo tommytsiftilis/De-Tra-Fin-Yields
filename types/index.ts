@@ -38,6 +38,7 @@ export interface SpreadDataPoint {
   aaveUsdcApy: number;
   aaveUsdtApy: number;
   compoundUsdcApy: number;
+  morphoUsdcApy: number;
   fedFundsRate: number;
   tbillRate: number;
   spreadVsFed: number;
@@ -49,6 +50,7 @@ export interface CurrentRates {
     aaveUsdc: number;
     aaveUsdt: number;
     compoundUsdc: number;
+    morphoUsdc: number;
   };
   tradfi: {
     fedFunds: number;

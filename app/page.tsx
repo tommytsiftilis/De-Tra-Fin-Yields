@@ -10,7 +10,7 @@ import UtilizationChart from "@/components/UtilizationChart";
 import MetricsCards from "@/components/MetricsCards";
 import { SpreadDataPoint, SpreadMetrics, CurrentRates } from "@/types";
 
-export type DefiSelection = "aaveUsdc" | "aaveUsdt" | "compoundUsdc";
+export type DefiSelection = "aaveUsdc" | "aaveUsdt" | "compoundUsdc" | "morphoUsdc";
 export type TradfiSelection = "fedFunds" | "tbill";
 
 interface SpreadApiResponse {

@@ -75,6 +75,13 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
           apy: rates.defi.compoundUsdc,
           description: "Base supply APY on Ethereum mainnet",
         },
+        {
+          id: "morpho-usdc",
+          asset: "USDC",
+          protocol: "Morpho (Steakhouse)",
+          apy: rates.defi.morphoUsdc,
+          description: "Curated vault yield on Ethereum mainnet",
+        },
       ]
     : [];
 

@@ -64,6 +64,7 @@ const DATA_SERIES: DataSeries[] = [
   { key: "aaveUsdcApy", name: "Aave USDC", color: "#6366f1", type: "defi" },
   { key: "aaveUsdtApy", name: "Aave USDT", color: "#8b5cf6", type: "defi" },
   { key: "compoundUsdcApy", name: "Compound USDC", color: "#06b6d4", type: "defi" },
+  { key: "morphoUsdcApy", name: "Morpho USDC", color: "#10b981", type: "defi" },
   { key: "fedFundsRate", name: "Fed Funds", color: "#f59e0b", type: "tradfi", dashed: true },
   { key: "tbillRate", name: "3M T-Bill", color: "#f97316", type: "tradfi", dashed: true },
 ];
@@ -273,13 +274,23 @@ export default function SpreadChart({
 
     // No sampling - show daily granularity
     // Add computed spreads for spread area feature
+    const defiKeyMap: Record<string, keyof typeof filtered[0]> = {
+      aaveUsdc: "aaveUsdcApy",
+      aaveUsdt: "aaveUsdtApy",
+      compoundUsdc: "compoundUsdcApy",
+      morphoUsdc: "morphoUsdcApy",
+    };
+    const tradfiKeyMap: Record<string, keyof typeof filtered[0]> = {
+      fedFunds: "fedFundsRate",
+      tbill: "tbillRate",
+    };
     return filtered.map((d) => {
       return {
         ...d,
         // For spread area (based on selected comparison)
         selectedSpread:
-          (d[`${selectedDefi === "aaveUsdc" ? "aaveUsdcApy" : selectedDefi === "aaveUsdt" ? "aaveUsdtApy" : "compoundUsdcApy"}`] as number) -
-          (d[selectedTradfi === "fedFunds" ? "fedFundsRate" : "tbillRate"] as number),
+          (d[defiKeyMap[selectedDefi]] as number) -
+          (d[tradfiKeyMap[selectedTradfi]] as number),
       };
     });
   }, [data, timeRange, customStartDate, customEndDate, selectedDefi, selectedTradfi]);

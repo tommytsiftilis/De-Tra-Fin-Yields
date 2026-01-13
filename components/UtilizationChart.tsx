@@ -36,6 +36,7 @@ const POOL_CONFIGS: PoolConfig[] = [
   { key: "aave-v3-USDC", name: "Aave USDC", color: "#6366f1" },
   { key: "aave-v3-USDT", name: "Aave USDT", color: "#8b5cf6" },
   { key: "compound-v3-USDC", name: "Compound USDC", color: "#06b6d4" },
+  { key: "morpho-blue-STEAKUSDC", name: "Morpho USDC", color: "#10b981" },
 ];
 
 type TimeRange = "1w" | "1m" | "3m" | "6m" | "1y" | "all" | "custom";

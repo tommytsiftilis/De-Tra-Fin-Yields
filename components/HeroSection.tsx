@@ -17,6 +17,7 @@ const DEFI_OPTIONS: { value: DefiSelection; label: string; protocol: string }[] 
   { value: "aaveUsdc", label: "USDC", protocol: "Aave V3" },
   { value: "aaveUsdt", label: "USDT", protocol: "Aave V3" },
   { value: "compoundUsdc", label: "USDC", protocol: "Compound V3" },
+  { value: "morphoUsdc", label: "USDC", protocol: "Morpho" },
 ];
 
 const TRADFI_OPTIONS: { value: TradfiSelection; label: string; description: string }[] = [
@@ -32,6 +33,8 @@ function getDefiRate(rates: CurrentRates, selection: DefiSelection): number {
       return rates.defi.aaveUsdt;
     case "compoundUsdc":
       return rates.defi.compoundUsdc;
+    case "morphoUsdc":
+      return rates.defi.morphoUsdc;
   }
 }
 

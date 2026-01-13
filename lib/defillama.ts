@@ -2,12 +2,33 @@ import { DefiPool, ApyHistory } from "@/types";
 
 const BASE_URL = "https://yields.llama.fi";
 
-// Pool identifiers for tracking - these are discovered from the /pools endpoint
-// Format: {chain}-{project}-{symbol}
-const POOL_FILTERS = {
-  AAVE_V3_USDC: { chain: "Ethereum", project: "aave-v3", symbol: "USDC" },
-  AAVE_V3_USDT: { chain: "Ethereum", project: "aave-v3", symbol: "USDT" },
-  COMPOUND_V3_USDC: { chain: "Ethereum", project: "compound-v3", symbol: "USDC" },
+// Tracked pool configuration with explicit pool IDs
+// Using hardcoded IDs ensures we always get the correct pool (filter matching can be ambiguous)
+export const TRACKED_POOLS = {
+  AAVE_V3_USDC: {
+    poolId: "aa70268e-4b52-42bf-a116-608b370f9501",
+    displayName: "Aave V3",
+    symbol: "USDC",
+    chain: "Ethereum",
+  },
+  AAVE_V3_USDT: {
+    poolId: "f981a304-bb6c-45b8-b0c5-fd2f515ad23a",
+    displayName: "Aave V3",
+    symbol: "USDT",
+    chain: "Ethereum",
+  },
+  COMPOUND_V3_USDC: {
+    poolId: "7da72d09-56ca-4ec5-a45f-59114353e487",
+    displayName: "Compound V3",
+    symbol: "USDC",
+    chain: "Ethereum",
+  },
+  MORPHO_USDC: {
+    poolId: "a44febf3-34f6-4cd5-8ab1-f246ebe49f9e",
+    displayName: "Morpho (Steakhouse)",
+    symbol: "USDC",
+    chain: "Ethereum",
+  },
 };
 
 export async function fetchAllPools(): Promise<DefiPool[]> {
@@ -26,15 +47,9 @@ export async function fetchAllPools(): Promise<DefiPool[]> {
 export async function fetchTrackedPools(): Promise<DefiPool[]> {
   const allPools = await fetchAllPools();
 
-  // Filter for our tracked pools
-  const trackedPools = allPools.filter((pool) => {
-    return Object.values(POOL_FILTERS).some(
-      (filter) =>
-        pool.chain === filter.chain &&
-        pool.project === filter.project &&
-        pool.symbol === filter.symbol
-    );
-  });
+  // Filter by explicit pool IDs for accuracy
+  const poolIds = Object.values(TRACKED_POOLS).map((p) => p.poolId);
+  const trackedPools = allPools.filter((pool) => poolIds.includes(pool.pool));
 
   return trackedPools;
 }
@@ -72,4 +87,3 @@ export async function fetchTrackedPoolsWithHistory(): Promise<{
   return { current: pools, historical };
 }
 
-export { POOL_FILTERS };

@@ -1,5 +1,6 @@
 import { format, parseISO, subMonths } from "date-fns";
 import { SpreadDataPoint, SpreadMetrics } from "@/types";
+import { TRACKED_POOLS } from "@/lib/defillama";
 
 export function formatDate(date: Date | string): string {
   const d = typeof date === "string" ? parseISO(date) : date;
@@ -28,7 +29,8 @@ export function getBestDefiRate(dataPoint: SpreadDataPoint): number {
   return Math.max(
     dataPoint.aaveUsdcApy || 0,
     dataPoint.aaveUsdtApy || 0,
-    dataPoint.compoundUsdcApy || 0
+    dataPoint.compoundUsdcApy || 0,
+    dataPoint.morphoUsdcApy || 0
   );
 }
 
@@ -84,6 +86,18 @@ export function getDateRange(monthsBack: number = 18): {
   };
 }
 
+// APY field keys in SpreadDataPoint
+type ApyKey = "aaveUsdcApy" | "aaveUsdtApy" | "compoundUsdcApy" | "morphoUsdcApy";
+
+// Map pool IDs to their data keys
+function getDataKeyForPoolId(poolId: string): ApyKey | null {
+  if (poolId === TRACKED_POOLS.AAVE_V3_USDC.poolId) return "aaveUsdcApy";
+  if (poolId === TRACKED_POOLS.AAVE_V3_USDT.poolId) return "aaveUsdtApy";
+  if (poolId === TRACKED_POOLS.COMPOUND_V3_USDC.poolId) return "compoundUsdcApy";
+  if (poolId === TRACKED_POOLS.MORPHO_USDC.poolId) return "morphoUsdcApy";
+  return null;
+}
+
 export function normalizeDataForChart(
   defiData: Array<{
     poolId: string;
@@ -97,14 +111,10 @@ export function normalizeDataForChart(
   // Create a map of date -> data
   const dateMap = new Map<string, Partial<SpreadDataPoint>>();
 
-  // Process DeFi data
+  // Process DeFi data using pool ID mapping
   for (const pool of defiData) {
-    const key =
-      pool.project === "aave-v3"
-        ? pool.symbol === "USDC"
-          ? "aaveUsdcApy"
-          : "aaveUsdtApy"
-        : "compoundUsdcApy";
+    const key = getDataKeyForPoolId(pool.poolId);
+    if (!key) continue;
 
     for (const point of pool.history) {
       const date = point.timestamp.split("T")[0];
@@ -148,6 +158,7 @@ export function normalizeDataForChart(
     aaveUsdcApy: 0,
     aaveUsdtApy: 0,
     compoundUsdcApy: 0,
+    morphoUsdcApy: 0,
     fedFundsRate: 0,
     tbillRate: 0,
   };
@@ -161,6 +172,7 @@ export function normalizeDataForChart(
       aaveUsdcApy: data.aaveUsdcApy ?? lastKnown.aaveUsdcApy,
       aaveUsdtApy: data.aaveUsdtApy ?? lastKnown.aaveUsdtApy,
       compoundUsdcApy: data.compoundUsdcApy ?? lastKnown.compoundUsdcApy,
+      morphoUsdcApy: data.morphoUsdcApy ?? lastKnown.morphoUsdcApy,
       fedFundsRate: data.fedFundsRate ?? lastKnown.fedFundsRate,
       tbillRate: data.tbillRate ?? lastKnown.tbillRate,
       spreadVsFed: 0,
@@ -177,6 +189,7 @@ export function normalizeDataForChart(
       aaveUsdcApy: point.aaveUsdcApy,
       aaveUsdtApy: point.aaveUsdtApy,
       compoundUsdcApy: point.compoundUsdcApy,
+      morphoUsdcApy: point.morphoUsdcApy,
       fedFundsRate: point.fedFundsRate,
       tbillRate: point.tbillRate,
     };
