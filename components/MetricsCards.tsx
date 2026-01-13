@@ -157,19 +157,19 @@ function MetricCard({
   icon?: React.ReactNode;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow">
+    <div className="bg-slate-100 rounded-xl border border-slate-300 p-4 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between mb-2">
-        <p className="text-sm font-medium text-gray-500">{title}</p>
+        <p className="text-sm font-medium text-slate-500">{title}</p>
         {icon}
       </div>
 
       {isLoading ? (
-        <div className="h-8 w-24 bg-gray-200 animate-pulse rounded" />
+        <div className="h-8 w-24 bg-slate-300 animate-pulse rounded" />
       ) : (
         <p
           className={`text-2xl font-bold ${
             isPositive === undefined
-              ? "text-gray-900"
+              ? "text-slate-800"
               : isPositive
                 ? "text-emerald-600"
                 : "text-red-600"
@@ -180,7 +180,7 @@ function MetricCard({
       )}
 
       {subtitle && (
-        <p className="text-xs text-gray-400 mt-1">{subtitle}</p>
+        <p className="text-xs text-slate-400 mt-1">{subtitle}</p>
       )}
 
       {sparklineData && sparklineKey && sparklineColor && !isLoading && (
@@ -195,7 +195,7 @@ function MetricCard({
       )}
 
       {description && (
-        <p className="text-xs text-gray-500 mt-2 pt-2 border-t border-gray-100">
+        <p className="text-xs text-slate-500 mt-2 pt-2 border-t border-slate-200">
           {description}
         </p>
       )}

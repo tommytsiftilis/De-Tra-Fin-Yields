@@ -13,14 +13,14 @@ export default function Header({ timestamp }: HeaderProps) {
     <header className="mb-8">
       {/* Title and last updated in same row */}
       <div className="flex flex-col items-center text-center">
-        <h1 className="text-3xl font-bold text-gray-900">
+        <h1 className="text-3xl font-bold text-slate-800">
           DeFi vs TradFi Yields
         </h1>
-        <p className="text-gray-500 mt-1 max-w-xl text-sm">
+        <p className="text-slate-500 mt-1 max-w-xl text-sm">
           Real-time comparison of DeFi stablecoin yields vs traditional risk-free rates
         </p>
         {timestamp && (
-          <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
+          <div className="flex items-center gap-2 mt-2 text-xs text-slate-400">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
             <span>
               Last updated:{" "}
@@ -39,7 +39,7 @@ export default function Header({ timestamp }: HeaderProps) {
       <div className="mt-4 max-w-lg mx-auto">
         <button
           onClick={() => setInfoExpanded(!infoExpanded)}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-50 to-amber-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-all text-sm text-gray-600"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-slate-100 rounded-lg border border-slate-300 hover:border-slate-400 transition-all text-sm text-slate-600"
         >
           <svg
             className="w-4 h-4 text-indigo-500"
@@ -66,21 +66,21 @@ export default function Header({ timestamp }: HeaderProps) {
         </button>
 
         {infoExpanded && (
-          <div className="mt-2 p-4 bg-white rounded-lg border border-gray-200 text-sm text-gray-600 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="mt-2 p-4 bg-slate-100 rounded-lg border border-slate-300 text-sm text-slate-600 animate-in fade-in slide-in-from-top-2 duration-200">
             <p>
               This tracks the yield spread between{" "}
-              <span className="font-medium text-indigo-600">DeFi lending</span>{" "}
+              <span className="font-medium text-indigo-400">DeFi lending</span>{" "}
               (Aave, Compound) and{" "}
-              <span className="font-medium text-amber-600">TradFi risk-free rates</span>{" "}
+              <span className="font-medium text-amber-500">TradFi risk-free rates</span>{" "}
               (Fed Funds, T-Bills).
             </p>
-            <ul className="mt-2 space-y-1 text-xs text-gray-500">
+            <ul className="mt-2 space-y-1 text-xs text-slate-500">
               <li className="flex items-start gap-2">
                 <span className="text-emerald-500 mt-0.5">●</span>
                 <span><strong>Positive spread</strong> = DeFi pays more (but with smart contract risk)</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-red-500 mt-0.5">●</span>
+                <span className="text-red-400 mt-0.5">●</span>
                 <span><strong>Negative spread</strong> = Capital flowing out of DeFi</span>
               </li>
             </ul>

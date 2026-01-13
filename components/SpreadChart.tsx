@@ -103,7 +103,7 @@ function ToggleButton({
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
         active
           ? "bg-gray-900 text-white"
-          : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+          : "bg-slate-300 text-slate-500 hover:bg-gray-200"
       }`}
     >
       <span
@@ -175,8 +175,8 @@ function CustomTooltip({
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3 min-w-[200px]">
-      <p className="text-xs font-medium text-gray-500 mb-2">
+    <div className="bg-slate-50 border border-slate-300 rounded-lg shadow-lg p-3 min-w-[200px]">
+      <p className="text-xs font-medium text-slate-500 mb-2">
         {formatTooltipDate(label as string)}
       </p>
 
@@ -190,9 +190,9 @@ function CustomTooltip({
                   className="w-2 h-2 rounded-full"
                   style={{ backgroundColor: rate.color }}
                 />
-                <span className="text-xs text-gray-600">{rate.name}</span>
+                <span className="text-xs text-slate-600">{rate.name}</span>
               </div>
-              <span className="text-xs font-mono font-medium text-gray-900">
+              <span className="text-xs font-mono font-medium text-slate-800">
                 {formatPercent(rate.value)}
               </span>
             </div>
@@ -204,7 +204,7 @@ function CustomTooltip({
       {spreadInfo && (
         <div className="border-t border-gray-100 pt-2 mt-2">
           <div className="flex items-center justify-between gap-4">
-            <span className="text-xs text-gray-500">Spread</span>
+            <span className="text-xs text-slate-500">Spread</span>
             <span
               className={`text-xs font-mono font-bold ${
                 spreadInfo.spread >= 0 ? "text-emerald-600" : "text-red-600"
@@ -214,7 +214,7 @@ function CustomTooltip({
               {formatPercent(spreadInfo.spread)}
             </span>
           </div>
-          <p className="text-[10px] text-gray-400 mt-0.5">
+          <p className="text-[10px] text-slate-400 mt-0.5">
             {spreadInfo.defiName} − {spreadInfo.tradfiName}
           </p>
         </div>
@@ -223,7 +223,7 @@ function CustomTooltip({
       {/* Explicit spread series values */}
       {spreadValues.length > 0 && (
         <div className={`${rateValues.length > 0 ? "border-t border-gray-100 pt-2 mt-2" : ""}`}>
-          <p className="text-[10px] uppercase tracking-wide text-gray-400 mb-1">Spreads</p>
+          <p className="text-[10px] uppercase tracking-wide text-slate-400 mb-1">Spreads</p>
           {spreadValues.map((spread) => (
             <div key={spread.name} className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-2">
@@ -231,7 +231,7 @@ function CustomTooltip({
                   className="w-2 h-2 rounded"
                   style={{ backgroundColor: spread.color }}
                 />
-                <span className="text-xs text-gray-600">{spread.name}</span>
+                <span className="text-xs text-slate-600">{spread.name}</span>
               </div>
               <span
                 className={`text-xs font-mono font-medium ${
@@ -361,15 +361,15 @@ export default function SpreadChart({
   }, [chartData, tickInterval]);
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div className="p-4 border-b border-gray-200">
+    <div className="bg-slate-100 rounded-xl border border-slate-300 overflow-hidden">
+      <div className="p-4 border-b border-slate-300">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-semibold text-slate-800">
                 Historical Yields
               </h2>
-              <p className="text-sm text-gray-500 mt-0.5">
+              <p className="text-sm text-slate-500 mt-0.5">
                 DeFi protocol yields vs Federal Reserve rates over time
               </p>
             </div>
@@ -383,11 +383,11 @@ export default function SpreadChart({
                   onChange={(e) => setShowSpreadArea(e.target.checked)}
                   className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                 />
-                <span className="text-gray-600">Spread area</span>
+                <span className="text-slate-600">Spread area</span>
               </label>
 
               {/* Time range selector */}
-              <div className="flex rounded-lg border border-gray-200 overflow-hidden">
+              <div className="flex rounded-lg border border-slate-300 overflow-hidden">
                 {TIME_RANGES.map((range) => (
                   <button
                     key={range.value}
@@ -395,7 +395,7 @@ export default function SpreadChart({
                     className={`px-3 py-1.5 text-sm font-medium transition-colors ${
                       timeRange === range.value
                         ? "bg-indigo-600 text-white"
-                        : "bg-white text-gray-600 hover:bg-gray-50"
+                        : "bg-slate-50 text-slate-600 hover:bg-slate-200"
                     }`}
                   >
                     {range.label}
@@ -407,7 +407,7 @@ export default function SpreadChart({
 
           {/* Rates toggles */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs text-gray-500 mr-1">Rates:</span>
+            <span className="text-xs text-slate-500 mr-1">Rates:</span>
             {DATA_SERIES.map((series) => (
               <ToggleButton
                 key={series.key}
@@ -419,7 +419,7 @@ export default function SpreadChart({
                 {series.name}
               </ToggleButton>
             ))}
-            <div className="flex items-center gap-1 ml-2 pl-2 border-l border-gray-200">
+            <div className="flex items-center gap-1 ml-2 pl-2 border-l border-slate-300">
               <button
                 onClick={selectAllSeries}
                 className="text-xs text-indigo-600 hover:underline"
@@ -452,7 +452,7 @@ export default function SpreadChart({
 
           {/* Spread series toggles */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs text-gray-500 mr-1">Spreads:</span>
+            <span className="text-xs text-slate-500 mr-1">Spreads:</span>
             {SPREAD_OPTIONS.map((spread) => (
               <ToggleButton
                 key={spread.id}
@@ -463,7 +463,7 @@ export default function SpreadChart({
                 {spread.name.replace(" vs ", " - ")}
               </ToggleButton>
             ))}
-            <div className="flex items-center gap-1 ml-2 pl-2 border-l border-gray-200">
+            <div className="flex items-center gap-1 ml-2 pl-2 border-l border-slate-300">
               <button
                 onClick={selectAllSpreads}
                 className="text-xs text-indigo-600 hover:underline"
@@ -486,14 +486,14 @@ export default function SpreadChart({
         <div className="h-80">
           {isLoading ? (
             <div className="h-full flex items-center justify-center">
-              <div className="animate-pulse text-gray-400">Loading chart...</div>
+              <div className="animate-pulse text-slate-400">Loading chart...</div>
             </div>
           ) : chartData.length === 0 ? (
-            <div className="h-full flex items-center justify-center text-gray-400">
+            <div className="h-full flex items-center justify-center text-slate-400">
               No data available
             </div>
           ) : visibleSeries.size === 0 && visibleSpreads.size === 0 ? (
-            <div className="h-full flex items-center justify-center text-gray-400">
+            <div className="h-full flex items-center justify-center text-slate-400">
               Select at least one rate or spread to display
             </div>
           ) : (
@@ -605,11 +605,11 @@ export default function SpreadChart({
         </div>
       </div>
 
-      <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
+      <div className="px-4 py-3 bg-slate-200 border-t border-slate-300">
         <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs">
           <span className="flex items-center gap-1.5">
             <span className="w-4 h-0.5 bg-indigo-500"></span>
-            <span className="text-gray-600">DeFi yields (solid lines)</span>
+            <span className="text-slate-600">DeFi yields (solid lines)</span>
           </span>
           <span className="flex items-center gap-1.5">
             <span
@@ -619,13 +619,13 @@ export default function SpreadChart({
                   "repeating-linear-gradient(90deg, #f59e0b 0px, #f59e0b 3px, transparent 3px, transparent 6px)",
               }}
             ></span>
-            <span className="text-gray-600">TradFi rates (dashed lines)</span>
+            <span className="text-slate-600">TradFi rates (dashed lines)</span>
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-4 h-3 bg-emerald-500/30 rounded"></span>
-            <span className="text-gray-600">Spread areas</span>
+            <span className="text-slate-600">Spread areas</span>
           </span>
-          <span className="text-gray-400 ml-auto">
+          <span className="text-slate-400 ml-auto">
             Tip: Select 1 DeFi + 1 TradFi to see spread in tooltip
           </span>
         </div>

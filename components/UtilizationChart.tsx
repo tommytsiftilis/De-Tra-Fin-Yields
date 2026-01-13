@@ -64,7 +64,7 @@ function ToggleButton({
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
         active
           ? "bg-gray-900 text-white"
-          : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+          : "bg-slate-300 text-slate-500 hover:bg-slate-400"
       }`}
     >
       <span
@@ -147,27 +147,27 @@ export default function UtilizationChart({
     : [];
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div className="p-4 border-b border-gray-200">
+    <div className="bg-slate-100 rounded-xl border border-slate-300 overflow-hidden">
+      <div className="p-4 border-b border-slate-300">
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-semibold text-slate-800">
                 DeFi Total Value Locked
               </h2>
-              <p className="text-sm text-gray-500 mt-0.5">
+              <p className="text-sm text-slate-500 mt-0.5">
                 Capital deposited in tracked lending pools
               </p>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold text-gray-900">{formatTvl(totalTvl)}</p>
-              <p className="text-xs text-gray-500">Selected pools TVL</p>
+              <p className="text-2xl font-bold text-slate-800">{formatTvl(totalTvl)}</p>
+              <p className="text-xs text-slate-500">Selected pools TVL</p>
             </div>
           </div>
 
           {/* Pool toggles */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs text-gray-500 mr-1">Show:</span>
+            <span className="text-xs text-slate-500 mr-1">Show:</span>
             {availablePools.map((pool) => (
               <ToggleButton
                 key={pool.key}
@@ -178,7 +178,7 @@ export default function UtilizationChart({
                 {pool.name}
               </ToggleButton>
             ))}
-            <div className="flex items-center gap-1 ml-2 pl-2 border-l border-gray-200">
+            <div className="flex items-center gap-1 ml-2 pl-2 border-l border-slate-300">
               <button
                 onClick={selectAll}
                 className="text-xs text-indigo-600 hover:underline"
@@ -201,14 +201,14 @@ export default function UtilizationChart({
         <div className="h-64">
           {isLoading ? (
             <div className="h-full flex items-center justify-center">
-              <div className="animate-pulse text-gray-400">Loading chart...</div>
+              <div className="animate-pulse text-slate-400">Loading chart...</div>
             </div>
           ) : mergedData.length === 0 ? (
-            <div className="h-full flex items-center justify-center text-gray-400">
+            <div className="h-full flex items-center justify-center text-slate-400">
               No data available
             </div>
           ) : visiblePools.size === 0 ? (
-            <div className="h-full flex items-center justify-center text-gray-400">
+            <div className="h-full flex items-center justify-center text-slate-400">
               Select at least one pool to display
             </div>
           ) : (
@@ -280,8 +280,8 @@ export default function UtilizationChart({
         </div>
       </div>
 
-      <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
-        <p className="text-xs text-gray-500">
+      <div className="px-4 py-3 bg-slate-200 border-t border-slate-300">
+        <p className="text-xs text-slate-500">
           <span className="font-medium">Why TVL matters:</span> Higher TVL generally indicates more trust in a protocol.
           TVL changes can also affect yields - more deposits typically lower rates as supply increases.
         </p>

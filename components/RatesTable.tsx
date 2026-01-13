@@ -86,15 +86,15 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
   return (
     <div className="space-y-4">
       {/* DeFi Rates Table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="p-4 border-b border-gray-200">
+      <div className="bg-slate-100 rounded-xl border border-slate-300 overflow-hidden">
+        <div className="p-4 border-b border-slate-300">
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
-                <h2 className="text-lg font-semibold text-gray-900">DeFi Stablecoin Yields</h2>
+                <h2 className="text-lg font-semibold text-slate-800">DeFi Stablecoin Yields</h2>
               </div>
-              <p className="text-sm text-gray-500 mt-0.5">
+              <p className="text-sm text-slate-500 mt-0.5">
                 Current lending rates from decentralized protocols
               </p>
             </div>
@@ -104,7 +104,7 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <tr className="bg-slate-200 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                 <th className="px-4 py-3">Asset</th>
                 <th className="px-4 py-3">Protocol</th>
                 <th className="px-4 py-3 text-right">Current APY</th>
@@ -114,7 +114,7 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
                     <select
                       value={riskFreeBase}
                       onChange={(e) => setRiskFreeBase(e.target.value as RiskFreeBase)}
-                      className="appearance-none bg-white border border-gray-200 rounded px-2 py-0.5 text-xs font-medium text-gray-700 cursor-pointer hover:border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      className="appearance-none bg-slate-50 border border-slate-300 rounded px-2 py-0.5 text-xs font-medium text-slate-700 cursor-pointer hover:border-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                     >
                       <option value="fedFunds">Fed Funds</option>
                       <option value="tbill">3M T-Bill</option>
@@ -123,27 +123,27 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-slate-200">
               {isLoading ? (
                 Array.from({ length: 3 }).map((_, i) => (
                   <tr key={i}>
                     <td className="px-4 py-4">
-                      <div className="h-4 w-12 bg-gray-200 animate-pulse rounded" />
+                      <div className="h-4 w-12 bg-slate-300 animate-pulse rounded" />
                     </td>
                     <td className="px-4 py-4">
-                      <div className="h-4 w-24 bg-gray-200 animate-pulse rounded" />
+                      <div className="h-4 w-24 bg-slate-300 animate-pulse rounded" />
                     </td>
                     <td className="px-4 py-4 text-right">
-                      <div className="h-4 w-16 bg-gray-200 animate-pulse rounded ml-auto" />
+                      <div className="h-4 w-16 bg-slate-300 animate-pulse rounded ml-auto" />
                     </td>
                     <td className="px-4 py-4 text-right">
-                      <div className="h-4 w-16 bg-gray-200 animate-pulse rounded ml-auto" />
+                      <div className="h-4 w-16 bg-slate-300 animate-pulse rounded ml-auto" />
                     </td>
                   </tr>
                 ))
               ) : defiRows.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-12 text-center text-gray-400">
+                  <td colSpan={4} className="px-4 py-12 text-center text-slate-400">
                     No data available
                   </td>
                 </tr>
@@ -153,16 +153,16 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
                   return (
                     <tr
                       key={row.id}
-                      className={`hover:bg-gray-50 transition-colors ${
+                      className={`hover:bg-slate-200 transition-colors ${
                         isBestRate ? "bg-emerald-50/50" : ""
                       }`}
                     >
                       <td className="px-4 py-4">
-                        <span className="font-medium text-gray-900">{row.asset}</span>
+                        <span className="font-medium text-slate-800">{row.asset}</span>
                       </td>
                       <td className="px-4 py-4">
                         <div>
-                          <span className="text-gray-900 font-medium">
+                          <span className="text-slate-800 font-medium">
                             {row.protocol}
                           </span>
                           {isBestRate && (
@@ -170,7 +170,7 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
                               Best
                             </span>
                           )}
-                          <p className="text-xs text-gray-500 mt-0.5">
+                          <p className="text-xs text-slate-500 mt-0.5">
                             {row.description}
                           </p>
                         </div>
@@ -191,8 +191,8 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
           </table>
         </div>
 
-        <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
-          <p className="text-xs text-gray-500">
+        <div className="px-4 py-3 bg-slate-200 border-t border-slate-300">
+          <p className="text-xs text-slate-500">
             Comparing against <span className="font-medium">{baseRateLabel}</span> ({formatPercent(baseRate)}).
             Positive spread means DeFi offers higher yields with smart contract risk.
           </p>
@@ -200,13 +200,13 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
       </div>
 
       {/* TradFi Rates Card */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="p-4 border-b border-gray-200">
+      <div className="bg-slate-100 rounded-xl border border-slate-300 overflow-hidden">
+        <div className="p-4 border-b border-slate-300">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-            <h2 className="text-lg font-semibold text-gray-900">TradFi Risk-Free Rates</h2>
+            <h2 className="text-lg font-semibold text-slate-800">TradFi Risk-Free Rates</h2>
           </div>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <p className="text-sm text-slate-500 mt-0.5">
             Federal Reserve benchmark rates
           </p>
         </div>
@@ -214,13 +214,13 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
         <div className="p-4">
           {isLoading ? (
             <div className="grid sm:grid-cols-2 gap-4">
-              <div className="p-4 bg-gray-50 rounded-lg animate-pulse">
-                <div className="h-4 w-24 bg-gray-200 rounded mb-2" />
-                <div className="h-8 w-20 bg-gray-200 rounded" />
+              <div className="p-4 bg-slate-200 rounded-lg animate-pulse">
+                <div className="h-4 w-24 bg-slate-300 rounded mb-2" />
+                <div className="h-8 w-20 bg-slate-300 rounded" />
               </div>
-              <div className="p-4 bg-gray-50 rounded-lg animate-pulse">
-                <div className="h-4 w-24 bg-gray-200 rounded mb-2" />
-                <div className="h-8 w-20 bg-gray-200 rounded" />
+              <div className="p-4 bg-slate-200 rounded-lg animate-pulse">
+                <div className="h-4 w-24 bg-slate-300 rounded mb-2" />
+                <div className="h-8 w-20 bg-slate-300 rounded" />
               </div>
             </div>
           ) : rates ? (
@@ -229,12 +229,12 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
                 className={`p-4 rounded-lg border transition-colors ${
                   riskFreeBase === "fedFunds"
                     ? "bg-amber-50 border-amber-200"
-                    : "bg-gray-50 border-gray-200 hover:border-gray-300 cursor-pointer"
+                    : "bg-slate-200 border-slate-300 hover:border-slate-400 cursor-pointer"
                 }`}
                 onClick={() => setRiskFreeBase("fedFunds")}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <p className="text-sm font-medium text-gray-700">Fed Funds Rate</p>
+                  <p className="text-sm font-medium text-slate-700">Fed Funds Rate</p>
                   {riskFreeBase === "fedFunds" && (
                     <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium">
                       Base
@@ -244,7 +244,7 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
                 <p className="text-2xl font-bold font-mono text-amber-600">
                   {formatPercent(rates.tradfi.fedFunds)}
                 </p>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-slate-500 mt-1">
                   Overnight interbank lending rate
                 </p>
               </div>
@@ -253,12 +253,12 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
                 className={`p-4 rounded-lg border transition-colors ${
                   riskFreeBase === "tbill"
                     ? "bg-amber-50 border-amber-200"
-                    : "bg-gray-50 border-gray-200 hover:border-gray-300 cursor-pointer"
+                    : "bg-slate-200 border-slate-300 hover:border-slate-400 cursor-pointer"
                 }`}
                 onClick={() => setRiskFreeBase("tbill")}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <p className="text-sm font-medium text-gray-700">3-Month T-Bill</p>
+                  <p className="text-sm font-medium text-slate-700">3-Month T-Bill</p>
                   {riskFreeBase === "tbill" && (
                     <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium">
                       Base
@@ -268,20 +268,20 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
                 <p className="text-2xl font-bold font-mono text-amber-600">
                   {formatPercent(rates.tradfi.tbill)}
                 </p>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-slate-500 mt-1">
                   US Treasury Bill yield
                 </p>
               </div>
             </div>
           ) : (
-            <div className="text-center text-gray-400 py-8">
+            <div className="text-center text-slate-400 py-8">
               No data available
             </div>
           )}
         </div>
 
-        <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
-          <p className="text-xs text-gray-500">
+        <div className="px-4 py-3 bg-slate-200 border-t border-slate-300">
+          <p className="text-xs text-slate-500">
             Click a rate to use it as the comparison base for DeFi yields above.
           </p>
         </div>

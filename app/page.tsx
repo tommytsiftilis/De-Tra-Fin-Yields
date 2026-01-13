@@ -56,7 +56,7 @@ export default function Home() {
   const errorMessage = error?.message || data?.error || "Unknown error";
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Header timestamp={data?.timestamp} />
 
@@ -126,9 +126,9 @@ export default function Home() {
         </div>
 
         {/* Footer */}
-        <footer className="mt-12 pt-8 border-t border-gray-200">
+        <footer className="mt-12 pt-8 border-t border-slate-300">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-slate-500">
               <p>
                 Data sources:{" "}
                 <a
@@ -151,12 +151,12 @@ export default function Home() {
                 (TradFi rates)
               </p>
             </div>
-            <div className="flex items-center gap-4 text-sm text-gray-400">
+            <div className="flex items-center gap-4 text-sm text-slate-400">
               <span>Auto-refresh: 5 min</span>
               <span>API cache: 1 hour</span>
             </div>
           </div>
-          <p className="mt-4 text-xs text-gray-400">
+          <p className="mt-4 text-xs text-slate-400">
             This dashboard is for informational purposes only. DeFi yields
             involve smart contract risk and are not equivalent to FDIC-insured
             deposits or government securities.
