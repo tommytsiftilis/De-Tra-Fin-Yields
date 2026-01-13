@@ -272,7 +272,7 @@ export default function UtilizationRateChart({
   };
 
   return (
-    <div className="bg-slate-900/50 rounded-xl border border-slate-700/50 overflow-hidden">
+    <div className="bg-slate-800/70 rounded-xl border border-slate-600/50 ring-1 ring-slate-700/30 overflow-hidden">
       <div className="p-4 border-b border-slate-700">
         <div className="flex flex-col gap-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -427,7 +427,7 @@ export default function UtilizationRateChart({
         </div>
       </div>
 
-      <div className="px-4 py-3 bg-slate-800/60 border-t border-slate-700">
+      <div className="px-4 py-3 bg-slate-700/40 border-t border-slate-700">
         <p className="text-xs text-slate-400">
           <span className="font-medium">Why utilization matters:</span> When utilization exceeds the optimal rate (~92%),
           interest rates increase sharply to incentivize more deposits. High utilization = higher yields but less liquidity.

@@ -209,7 +209,7 @@ export default function TvlChart({
     : [];
 
   return (
-    <div className="bg-slate-900/50 rounded-xl border border-slate-700/50 overflow-hidden">
+    <div className="bg-slate-800/70 rounded-xl border border-slate-600/50 ring-1 ring-slate-700/30 overflow-hidden">
       <div className="p-4 border-b border-slate-700">
         <div className="flex flex-col gap-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -395,7 +395,7 @@ export default function TvlChart({
         </div>
       </div>
 
-      <div className="px-4 py-3 bg-slate-800/60 border-t border-slate-700">
+      <div className="px-4 py-3 bg-slate-700/40 border-t border-slate-700">
         <p className="text-xs text-slate-400">
           <span className="font-medium">Why TVL matters:</span> Higher TVL generally indicates more trust in a protocol.
           TVL changes can also affect yields - more deposits typically lower rates as supply increases.

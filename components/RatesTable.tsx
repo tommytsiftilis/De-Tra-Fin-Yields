@@ -89,7 +89,7 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
   const bestDefiApy = defiRows.length > 0 ? Math.max(...defiRows.map((r) => r.apy)) : 0;
 
   return (
-    <div className="bg-slate-900/50 rounded-xl border border-slate-700/50 overflow-hidden">
+    <div className="bg-slate-800/70 rounded-xl border border-slate-600/50 ring-1 ring-slate-700/30 overflow-hidden">
       <div className="p-4 border-b border-slate-700">
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
@@ -136,7 +136,7 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-slate-800 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
+              <tr className="bg-slate-700/60 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
                 <th className="px-4 py-3">Asset</th>
                 <th className="px-4 py-3">Protocol</th>
                 <th className="px-4 py-3 text-right">Current APY</th>
@@ -211,7 +211,7 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
           </table>
         </div>
 
-        <div className="px-4 py-3 bg-slate-800/60 border-t border-slate-700">
+        <div className="px-4 py-3 bg-slate-700/40 border-t border-slate-700">
           <p className="text-xs text-slate-400">
             Positive spread means DeFi offers higher yields with smart contract risk.
           </p>

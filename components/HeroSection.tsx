@@ -127,7 +127,7 @@ export default function HeroSection({
   }));
 
   return (
-    <div className="bg-slate-900/50 rounded-2xl p-6 md:p-8 border border-slate-700/50 backdrop-blur-sm shadow-sm">
+    <div className="bg-slate-800/80 rounded-2xl p-6 md:p-8 border border-slate-600/60 ring-1 ring-slate-700/50 backdrop-blur-sm shadow-sm">
       {/* Title */}
       <div className="text-center mb-6">
         <p className="text-sm font-medium text-slate-400 uppercase tracking-wide">
