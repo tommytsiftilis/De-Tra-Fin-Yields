@@ -38,7 +38,7 @@ export interface SpreadDataPoint {
   aaveUsdcApy: number;
   aaveUsdtApy: number;
   compoundUsdcApy: number;
-  morphoUsdcApy: number;
+  morphoUsdcApy: number | null;
   fedFundsRate: number;
   tbillRate: number;
   spreadVsFed: number;

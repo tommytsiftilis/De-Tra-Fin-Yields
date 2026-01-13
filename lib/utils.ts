@@ -30,7 +30,7 @@ export function getBestDefiRate(dataPoint: SpreadDataPoint): number {
     dataPoint.aaveUsdcApy || 0,
     dataPoint.aaveUsdtApy || 0,
     dataPoint.compoundUsdcApy || 0,
-    dataPoint.morphoUsdcApy || 0
+    dataPoint.morphoUsdcApy ?? 0
   );
 }
 
@@ -158,7 +158,7 @@ export function normalizeDataForChart(
     aaveUsdcApy: 0,
     aaveUsdtApy: 0,
     compoundUsdcApy: 0,
-    morphoUsdcApy: 0,
+    morphoUsdcApy: null as number | null, // null until we see real data
     fedFundsRate: 0,
     tbillRate: 0,
   };
@@ -166,13 +166,19 @@ export function normalizeDataForChart(
   for (const date of sortedDates) {
     const data = dateMap.get(date)!;
 
+    // For Morpho, only carry forward if we've seen real data (not starting from 0)
+    // This prevents showing 0 before the protocol existed
+    const morphoValue = data.morphoUsdcApy !== undefined
+      ? data.morphoUsdcApy
+      : lastKnown.morphoUsdcApy;
+
     // Carry forward missing values
     const point: SpreadDataPoint = {
       date,
       aaveUsdcApy: data.aaveUsdcApy ?? lastKnown.aaveUsdcApy,
       aaveUsdtApy: data.aaveUsdtApy ?? lastKnown.aaveUsdtApy,
       compoundUsdcApy: data.compoundUsdcApy ?? lastKnown.compoundUsdcApy,
-      morphoUsdcApy: data.morphoUsdcApy ?? lastKnown.morphoUsdcApy,
+      morphoUsdcApy: morphoValue,
       fedFundsRate: data.fedFundsRate ?? lastKnown.fedFundsRate,
       tbillRate: data.tbillRate ?? lastKnown.tbillRate,
       spreadVsFed: 0,
@@ -189,7 +195,7 @@ export function normalizeDataForChart(
       aaveUsdcApy: point.aaveUsdcApy,
       aaveUsdtApy: point.aaveUsdtApy,
       compoundUsdcApy: point.compoundUsdcApy,
-      morphoUsdcApy: point.morphoUsdcApy,
+      morphoUsdcApy: morphoValue,
       fedFundsRate: point.fedFundsRate,
       tbillRate: point.tbillRate,
     };
