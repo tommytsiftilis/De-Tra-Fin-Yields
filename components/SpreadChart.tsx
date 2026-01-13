@@ -16,7 +16,8 @@ import {
 } from "recharts";
 import { SpreadDataPoint } from "@/types";
 import { DefiSelection, TradfiSelection } from "@/app/page";
-import { formatShortDate, formatPercent } from "@/lib/utils";
+import { formatPercent } from "@/lib/utils";
+import { format, parseISO } from "date-fns";
 
 interface SpreadChartProps {
   data?: SpreadDataPoint[];
@@ -27,12 +28,27 @@ interface SpreadChartProps {
 
 type TimeRange = "3m" | "6m" | "1y" | "all";
 
-const TIME_RANGES: { value: TimeRange; label: string; days: number }[] = [
-  { value: "3m", label: "3M", days: 90 },
-  { value: "6m", label: "6M", days: 180 },
-  { value: "1y", label: "1Y", days: 365 },
-  { value: "all", label: "All", days: Infinity },
+const TIME_RANGES: { value: TimeRange; label: string; days: number; tickInterval: number }[] = [
+  { value: "3m", label: "3M", days: 90, tickInterval: 14 },     // Every 2 weeks
+  { value: "6m", label: "6M", days: 180, tickInterval: 30 },    // Monthly
+  { value: "1y", label: "1Y", days: 365, tickInterval: 60 },    // Every 2 months
+  { value: "all", label: "All", days: Infinity, tickInterval: 90 }, // Quarterly
 ];
+
+// Format date for axis based on time range
+function formatAxisDate(dateStr: string, timeRange: TimeRange): string {
+  const d = parseISO(dateStr);
+  if (timeRange === "3m") {
+    return format(d, "MMM d");
+  }
+  return format(d, "MMM ''yy");
+}
+
+// Format date for tooltip
+function formatTooltipDate(dateStr: string): string {
+  const d = parseISO(dateStr);
+  return format(d, "MMM d, yyyy");
+}
 
 interface DataSeries {
   key: string;
@@ -161,7 +177,7 @@ function CustomTooltip({
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3 min-w-[200px]">
       <p className="text-xs font-medium text-gray-500 mb-2">
-        {formatShortDate(label)}
+        {formatTooltipDate(label as string)}
       </p>
 
       {/* Rate values */}
@@ -306,13 +322,9 @@ export default function SpreadChart({
       filtered = data.filter((d) => new Date(d.date) >= cutoffDate);
     }
 
-    // Sample data for performance
-    const sampled = filtered.filter(
-      (_, i) => i % 3 === 0 || i === filtered.length - 1
-    );
-
+    // No sampling - show daily granularity
     // Add computed spreads
-    return sampled.map((d) => {
+    return filtered.map((d) => {
       const spreads: Record<string, number> = {};
       for (const opt of SPREAD_OPTIONS) {
         spreads[opt.id] = (d[opt.defiKey as keyof SpreadDataPoint] as number) -
@@ -328,6 +340,25 @@ export default function SpreadChart({
       };
     });
   }, [data, timeRange, selectedDefi, selectedTradfi]);
+
+  // Get tick interval for current time range
+  const currentRange = TIME_RANGES.find((r) => r.value === timeRange);
+  const tickInterval = currentRange?.tickInterval || 30;
+
+  // Generate tick values - show only certain dates
+  const ticks = useMemo(() => {
+    if (chartData.length === 0) return [];
+    const result: string[] = [];
+    for (let i = 0; i < chartData.length; i += tickInterval) {
+      result.push(chartData[i].date);
+    }
+    // Always include the last date
+    const lastDate = chartData[chartData.length - 1]?.date;
+    if (lastDate && !result.includes(lastDate)) {
+      result.push(lastDate);
+    }
+    return result;
+  }, [chartData, tickInterval]);
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -494,10 +525,12 @@ export default function SpreadChart({
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis
                   dataKey="date"
-                  tickFormatter={(date) => formatShortDate(date)}
+                  ticks={ticks}
+                  tickFormatter={(date) => formatAxisDate(date, timeRange)}
                   tick={{ fontSize: 11, fill: "#6b7280" }}
                   stroke="#d1d5db"
                   tickLine={false}
+                  interval="preserveStartEnd"
                 />
                 <YAxis
                   tickFormatter={(value) => `${value.toFixed(0)}%`}
