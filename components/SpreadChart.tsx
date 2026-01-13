@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -13,6 +11,7 @@ import {
   Area,
   ComposedChart,
   ReferenceLine,
+  Line,
 } from "recharts";
 import { SpreadDataPoint } from "@/types";
 import { formatShortDate, formatPercent } from "@/lib/utils";
@@ -31,17 +30,92 @@ const TIME_RANGES: { value: TimeRange; label: string; days: number }[] = [
   { value: "all", label: "All", days: Infinity },
 ];
 
-const COLORS = {
-  aaveUsdc: "#6366f1",
-  aaveUsdt: "#8b5cf6",
-  compoundUsdc: "#06b6d4",
-  fedFunds: "#f59e0b",
-  tbill: "#f97316",
-};
+interface DataSeries {
+  key: string;
+  name: string;
+  color: string;
+  type: "defi" | "tradfi";
+  dashed?: boolean;
+}
+
+const DATA_SERIES: DataSeries[] = [
+  { key: "aaveUsdcApy", name: "Aave USDC", color: "#6366f1", type: "defi" },
+  { key: "aaveUsdtApy", name: "Aave USDT", color: "#8b5cf6", type: "defi" },
+  { key: "compoundUsdcApy", name: "Compound USDC", color: "#06b6d4", type: "defi" },
+  { key: "fedFundsRate", name: "Fed Funds", color: "#f59e0b", type: "tradfi", dashed: true },
+  { key: "tbillRate", name: "3M T-Bill", color: "#f97316", type: "tradfi", dashed: true },
+];
+
+function ToggleButton({
+  active,
+  onClick,
+  color,
+  children,
+  dashed,
+}: {
+  active: boolean;
+  onClick: () => void;
+  color: string;
+  children: React.ReactNode;
+  dashed?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
+        active
+          ? "bg-gray-900 text-white"
+          : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+      }`}
+    >
+      <span
+        className={`w-3 h-0.5 rounded-full ${dashed ? "" : ""}`}
+        style={{
+          backgroundColor: active ? color : "#9ca3af",
+          backgroundImage: dashed
+            ? `repeating-linear-gradient(90deg, ${active ? color : "#9ca3af"} 0px, ${active ? color : "#9ca3af"} 2px, transparent 2px, transparent 4px)`
+            : undefined,
+        }}
+      />
+      {children}
+    </button>
+  );
+}
 
 export default function SpreadChart({ data, isLoading }: SpreadChartProps) {
   const [timeRange, setTimeRange] = useState<TimeRange>("6m");
   const [showSpreadArea, setShowSpreadArea] = useState(true);
+  const [visibleSeries, setVisibleSeries] = useState<Set<string>>(
+    new Set(DATA_SERIES.map((s) => s.key))
+  );
+
+  const toggleSeries = (key: string) => {
+    setVisibleSeries((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  };
+
+  const selectAll = () => {
+    setVisibleSeries(new Set(DATA_SERIES.map((s) => s.key)));
+  };
+
+  const selectNone = () => {
+    setVisibleSeries(new Set());
+  };
+
+  const selectDefi = () => {
+    setVisibleSeries(new Set(DATA_SERIES.filter((s) => s.type === "defi").map((s) => s.key)));
+  };
+
+  const selectTradfi = () => {
+    setVisibleSeries(new Set(DATA_SERIES.filter((s) => s.type === "tradfi").map((s) => s.key)));
+  };
 
   // Filter data by time range
   const filteredData = data
@@ -68,43 +142,90 @@ export default function SpreadChart({ data, isLoading }: SpreadChartProps) {
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
       <div className="p-4 border-b border-gray-200">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">
-              Historical Yields
-            </h2>
-            <p className="text-sm text-gray-500 mt-0.5">
-              DeFi protocol yields vs Federal Reserve rates over time
-            </p>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Historical Yields
+              </h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                DeFi protocol yields vs Federal Reserve rates over time
+              </p>
+            </div>
+
+            <div className="flex items-center gap-4">
+              {/* Spread toggle */}
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={showSpreadArea}
+                  onChange={(e) => setShowSpreadArea(e.target.checked)}
+                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                <span className="text-gray-600">Spread area</span>
+              </label>
+
+              {/* Time range selector */}
+              <div className="flex rounded-lg border border-gray-200 overflow-hidden">
+                {TIME_RANGES.map((range) => (
+                  <button
+                    key={range.value}
+                    onClick={() => setTimeRange(range.value)}
+                    className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+                      timeRange === range.value
+                        ? "bg-indigo-600 text-white"
+                        : "bg-white text-gray-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    {range.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            {/* Spread toggle */}
-            <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <input
-                type="checkbox"
-                checked={showSpreadArea}
-                onChange={(e) => setShowSpreadArea(e.target.checked)}
-                className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-              />
-              <span className="text-gray-600">Show spread</span>
-            </label>
-
-            {/* Time range selector */}
-            <div className="flex rounded-lg border border-gray-200 overflow-hidden">
-              {TIME_RANGES.map((range) => (
-                <button
-                  key={range.value}
-                  onClick={() => setTimeRange(range.value)}
-                  className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-                    timeRange === range.value
-                      ? "bg-indigo-600 text-white"
-                      : "bg-white text-gray-600 hover:bg-gray-50"
-                  }`}
-                >
-                  {range.label}
-                </button>
-              ))}
+          {/* Series toggles */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-gray-500 mr-1">Show:</span>
+            {DATA_SERIES.map((series) => (
+              <ToggleButton
+                key={series.key}
+                active={visibleSeries.has(series.key)}
+                onClick={() => toggleSeries(series.key)}
+                color={series.color}
+                dashed={series.dashed}
+              >
+                {series.name}
+              </ToggleButton>
+            ))}
+            <div className="flex items-center gap-1 ml-2 pl-2 border-l border-gray-200">
+              <button
+                onClick={selectAll}
+                className="text-xs text-indigo-600 hover:underline"
+              >
+                All
+              </button>
+              <span className="text-gray-300">|</span>
+              <button
+                onClick={selectNone}
+                className="text-xs text-indigo-600 hover:underline"
+              >
+                None
+              </button>
+              <span className="text-gray-300">|</span>
+              <button
+                onClick={selectDefi}
+                className="text-xs text-indigo-600 hover:underline"
+              >
+                DeFi
+              </button>
+              <span className="text-gray-300">|</span>
+              <button
+                onClick={selectTradfi}
+                className="text-xs text-indigo-600 hover:underline"
+              >
+                TradFi
+              </button>
             </div>
           </div>
         </div>
@@ -183,51 +304,21 @@ export default function SpreadChart({ data, isLoading }: SpreadChartProps) {
                   />
                 )}
 
-                {/* DeFi lines */}
-                <Line
-                  type="monotone"
-                  dataKey="aaveUsdcApy"
-                  name="Aave USDC"
-                  stroke={COLORS.aaveUsdc}
-                  dot={false}
-                  strokeWidth={2}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="aaveUsdtApy"
-                  name="Aave USDT"
-                  stroke={COLORS.aaveUsdt}
-                  dot={false}
-                  strokeWidth={2}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="compoundUsdcApy"
-                  name="Compound USDC"
-                  stroke={COLORS.compoundUsdc}
-                  dot={false}
-                  strokeWidth={2}
-                />
-
-                {/* TradFi lines (dashed) */}
-                <Line
-                  type="monotone"
-                  dataKey="fedFundsRate"
-                  name="Fed Funds"
-                  stroke={COLORS.fedFunds}
-                  dot={false}
-                  strokeWidth={2}
-                  strokeDasharray="5 5"
-                />
-                <Line
-                  type="monotone"
-                  dataKey="tbillRate"
-                  name="3M T-Bill"
-                  stroke={COLORS.tbill}
-                  dot={false}
-                  strokeWidth={2}
-                  strokeDasharray="5 5"
-                />
+                {/* Dynamic lines based on visibility */}
+                {DATA_SERIES.map((series) =>
+                  visibleSeries.has(series.key) ? (
+                    <Line
+                      key={series.key}
+                      type="monotone"
+                      dataKey={series.key}
+                      name={series.name}
+                      stroke={series.color}
+                      dot={false}
+                      strokeWidth={2}
+                      strokeDasharray={series.dashed ? "5 5" : undefined}
+                    />
+                  ) : null
+                )}
               </ComposedChart>
             </ResponsiveContainer>
           )}
@@ -241,7 +332,13 @@ export default function SpreadChart({ data, isLoading }: SpreadChartProps) {
             <span className="text-gray-600">DeFi yields (solid lines)</span>
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-4 h-0.5 bg-amber-500" style={{ backgroundImage: "repeating-linear-gradient(90deg, #f59e0b 0px, #f59e0b 3px, transparent 3px, transparent 6px)" }}></span>
+            <span
+              className="w-4 h-0.5"
+              style={{
+                backgroundImage:
+                  "repeating-linear-gradient(90deg, #f59e0b 0px, #f59e0b 3px, transparent 3px, transparent 6px)",
+              }}
+            ></span>
             <span className="text-gray-600">TradFi rates (dashed lines)</span>
           </span>
           {showSpreadArea && (

@@ -1,51 +1,14 @@
-interface HeaderProps {
-  lastUpdated?: string;
-}
-
-export default function Header({ lastUpdated }: HeaderProps) {
+export default function Header() {
   return (
     <header className="mb-8">
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            DeFi vs TradFi Yields
-          </h1>
-          <p className="text-gray-600 mt-1 max-w-2xl">
-            Real-time comparison of decentralized finance stablecoin lending
-            yields against traditional risk-free rates
-          </p>
-        </div>
-
-        <div className="flex items-center gap-4 text-sm">
-          {lastUpdated && (
-            <div className="flex items-center gap-2 text-gray-500">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-              <span>
-                Updated{" "}
-                {new Date(lastUpdated).toLocaleTimeString("en-US", {
-                  hour: "numeric",
-                  minute: "2-digit",
-                })}
-              </span>
-            </div>
-          )}
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg text-gray-600">
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <span>Refreshes every 5 min</span>
-          </div>
-        </div>
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">
+          DeFi vs TradFi Yields
+        </h1>
+        <p className="text-gray-600 mt-1 max-w-2xl">
+          Real-time comparison of decentralized finance stablecoin lending
+          yields against traditional risk-free rates
+        </p>
       </div>
 
       {/* Quick explanation */}

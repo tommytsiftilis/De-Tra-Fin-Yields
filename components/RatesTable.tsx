@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { formatPercent } from "@/lib/utils";
 import { CurrentRates } from "@/types";
 
@@ -9,6 +10,7 @@ interface RatesTableProps {
 }
 
 interface RateRow {
+  id: string;
   asset: string;
   protocol: string;
   apy: number;
@@ -58,10 +60,80 @@ function TypeBadge({ type }: { type: "defi" | "tradfi" }) {
   );
 }
 
+function ToggleChip({
+  active,
+  onClick,
+  children,
+  color,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+  color: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
+        active
+          ? "bg-gray-900 text-white"
+          : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+      }`}
+    >
+      <span
+        className="w-2 h-2 rounded-full"
+        style={{ backgroundColor: active ? color : "#9ca3af" }}
+      />
+      {children}
+    </button>
+  );
+}
+
+const RATE_CONFIGS = [
+  { id: "aave-usdc", name: "Aave USDC", color: "#6366f1" },
+  { id: "aave-usdt", name: "Aave USDT", color: "#8b5cf6" },
+  { id: "compound-usdc", name: "Compound USDC", color: "#06b6d4" },
+  { id: "fed-funds", name: "Fed Funds", color: "#f59e0b" },
+  { id: "tbill", name: "3M T-Bill", color: "#f97316" },
+];
+
 export default function RatesTable({ rates, isLoading }: RatesTableProps) {
-  const rows: RateRow[] = rates
+  const [visibleRates, setVisibleRates] = useState<Set<string>>(
+    new Set(RATE_CONFIGS.map((r) => r.id))
+  );
+
+  const toggleRate = (id: string) => {
+    setVisibleRates((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const selectAll = () => {
+    setVisibleRates(new Set(RATE_CONFIGS.map((r) => r.id)));
+  };
+
+  const selectNone = () => {
+    setVisibleRates(new Set());
+  };
+
+  const selectDefi = () => {
+    setVisibleRates(new Set(["aave-usdc", "aave-usdt", "compound-usdc"]));
+  };
+
+  const selectTradfi = () => {
+    setVisibleRates(new Set(["fed-funds", "tbill"]));
+  };
+
+  const allRows: RateRow[] = rates
     ? [
         {
+          id: "aave-usdc",
           asset: "USDC",
           protocol: "Aave V3",
           apy: rates.defi.aaveUsdc,
@@ -70,6 +142,7 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
           description: "Variable supply APY on Ethereum mainnet",
         },
         {
+          id: "aave-usdt",
           asset: "USDT",
           protocol: "Aave V3",
           apy: rates.defi.aaveUsdt,
@@ -78,6 +151,7 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
           description: "Variable supply APY on Ethereum mainnet",
         },
         {
+          id: "compound-usdc",
           asset: "USDC",
           protocol: "Compound V3",
           apy: rates.defi.compoundUsdc,
@@ -86,6 +160,7 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
           description: "Base supply APY on Ethereum mainnet",
         },
         {
+          id: "fed-funds",
           asset: "USD",
           protocol: "Fed Funds Rate",
           apy: rates.tradfi.fedFunds,
@@ -94,6 +169,7 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
           description: "Overnight interbank lending rate (risk-free benchmark)",
         },
         {
+          id: "tbill",
           asset: "USD",
           protocol: "3-Month T-Bill",
           apy: rates.tradfi.tbill,
@@ -104,30 +180,77 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
       ]
     : [];
 
-  // Find best DeFi rate
-  const bestDefiApy = rates
-    ? Math.max(rates.defi.aaveUsdc, rates.defi.aaveUsdt, rates.defi.compoundUsdc)
-    : 0;
+  const rows = allRows.filter((row) => visibleRates.has(row.id));
+
+  // Find best DeFi rate among visible rows
+  const visibleDefiRates = rows.filter((r) => r.type === "defi").map((r) => r.apy);
+  const bestDefiApy = visibleDefiRates.length > 0 ? Math.max(...visibleDefiRates) : 0;
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
       <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">Current Rates</h2>
-            <p className="text-sm text-gray-500 mt-0.5">
-              Live yields from DeFi protocols and traditional finance
-            </p>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">Current Rates</h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                Live yields from DeFi protocols and traditional finance
+              </p>
+            </div>
+            <div className="flex items-center gap-4 text-xs">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
+                DeFi
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                TradFi
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-4 text-xs">
-            <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
-              DeFi
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-              TradFi
-            </span>
+
+          {/* Rate toggles */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-gray-500 mr-1">Show:</span>
+            {RATE_CONFIGS.map((config) => (
+              <ToggleChip
+                key={config.id}
+                active={visibleRates.has(config.id)}
+                onClick={() => toggleRate(config.id)}
+                color={config.color}
+              >
+                {config.name}
+              </ToggleChip>
+            ))}
+            <div className="flex items-center gap-1 ml-2 pl-2 border-l border-gray-200">
+              <button
+                onClick={selectAll}
+                className="text-xs text-indigo-600 hover:underline"
+              >
+                All
+              </button>
+              <span className="text-gray-300">|</span>
+              <button
+                onClick={selectNone}
+                className="text-xs text-indigo-600 hover:underline"
+              >
+                None
+              </button>
+              <span className="text-gray-300">|</span>
+              <button
+                onClick={selectDefi}
+                className="text-xs text-indigo-600 hover:underline"
+              >
+                DeFi
+              </button>
+              <span className="text-gray-300">|</span>
+              <button
+                onClick={selectTradfi}
+                className="text-xs text-indigo-600 hover:underline"
+              >
+                TradFi
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -168,15 +291,17 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
             ) : rows.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-4 py-12 text-center text-gray-400">
-                  No data available
+                  {visibleRates.size === 0
+                    ? "Select at least one rate to display"
+                    : "No data available"}
                 </td>
               </tr>
             ) : (
-              rows.map((row, i) => {
-                const isBestRate = row.type === "defi" && row.apy === bestDefiApy;
+              rows.map((row) => {
+                const isBestRate = row.type === "defi" && row.apy === bestDefiApy && bestDefiApy > 0;
                 return (
                   <tr
-                    key={i}
+                    key={row.id}
                     className={`hover:bg-gray-50 transition-colors ${
                       isBestRate ? "bg-emerald-50/50" : ""
                     }`}

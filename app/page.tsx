@@ -49,8 +49,30 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gray-50">
+      {/* Top bar with last updated */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex justify-end">
+          {data?.timestamp ? (
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+              <span>
+                Last updated:{" "}
+                {new Date(data.timestamp).toLocaleString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                })}
+              </span>
+            </div>
+          ) : (
+            <div className="h-5" />
+          )}
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Header lastUpdated={data?.timestamp} />
+        <Header />
 
         {hasError && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
@@ -130,7 +152,7 @@ export default function Home() {
               </p>
             </div>
             <div className="flex items-center gap-4 text-sm text-gray-400">
-              <span>Client refreshes: 5 min</span>
+              <span>Auto-refresh: 5 min</span>
               <span>API cache: 1 hour</span>
             </div>
           </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   AreaChart,
   Area,
@@ -24,11 +25,17 @@ interface UtilizationChartProps {
   isLoading?: boolean;
 }
 
-const COLORS: Record<string, string> = {
-  "aave-v3-USDC": "#6366f1",
-  "aave-v3-USDT": "#8b5cf6",
-  "compound-v3-USDC": "#06b6d4",
-};
+interface PoolConfig {
+  key: string;
+  name: string;
+  color: string;
+}
+
+const POOL_CONFIGS: PoolConfig[] = [
+  { key: "aave-v3-USDC", name: "Aave USDC", color: "#6366f1" },
+  { key: "aave-v3-USDT", name: "Aave USDT", color: "#8b5cf6" },
+  { key: "compound-v3-USDC", name: "Compound USDC", color: "#06b6d4" },
+];
 
 function formatTvl(value: number): string {
   if (value >= 1e9) {
@@ -40,10 +47,63 @@ function formatTvl(value: number): string {
   return `$${(value / 1e3).toFixed(0)}K`;
 }
 
+function ToggleButton({
+  active,
+  onClick,
+  color,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  color: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
+        active
+          ? "bg-gray-900 text-white"
+          : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+      }`}
+    >
+      <span
+        className="w-2.5 h-2.5 rounded-sm"
+        style={{ backgroundColor: active ? color : "#9ca3af" }}
+      />
+      {children}
+    </button>
+  );
+}
+
 export default function UtilizationChart({
   data,
   isLoading,
 }: UtilizationChartProps) {
+  const [visiblePools, setVisiblePools] = useState<Set<string>>(
+    new Set(POOL_CONFIGS.map((p) => p.key))
+  );
+
+  const togglePool = (key: string) => {
+    setVisiblePools((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  };
+
+  const selectAll = () => {
+    setVisiblePools(new Set(POOL_CONFIGS.map((p) => p.key)));
+  };
+
+  const selectNone = () => {
+    setVisiblePools(new Set());
+  };
+
   // Merge all pool data into a single time series
   const mergedData: Array<Record<string, number | string>> = [];
 
@@ -71,31 +131,68 @@ export default function UtilizationChart({
     }
   }
 
-  // Calculate total TVL for the latest date
+  // Calculate total TVL for visible pools only
   const latestData = mergedData[mergedData.length - 1];
   const totalTvl = latestData
     ? Object.entries(latestData)
-        .filter(([key]) => key !== "date")
+        .filter(([key]) => key !== "date" && visiblePools.has(key))
         .reduce((sum, [, value]) => sum + (typeof value === "number" ? value : 0), 0)
     : 0;
 
-  const pools = data || [];
+  // Get available pools from data
+  const availablePools = data
+    ? POOL_CONFIGS.filter((config) =>
+        data.some((d) => `${d.project}-${d.symbol}` === config.key)
+      )
+    : [];
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
       <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">
-              DeFi Total Value Locked
-            </h2>
-            <p className="text-sm text-gray-500 mt-0.5">
-              Capital deposited in tracked lending pools
-            </p>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                DeFi Total Value Locked
+              </h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                Capital deposited in tracked lending pools
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-2xl font-bold text-gray-900">{formatTvl(totalTvl)}</p>
+              <p className="text-xs text-gray-500">Selected pools TVL</p>
+            </div>
           </div>
-          <div className="text-right">
-            <p className="text-2xl font-bold text-gray-900">{formatTvl(totalTvl)}</p>
-            <p className="text-xs text-gray-500">Current Total TVL</p>
+
+          {/* Pool toggles */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-gray-500 mr-1">Show:</span>
+            {availablePools.map((pool) => (
+              <ToggleButton
+                key={pool.key}
+                active={visiblePools.has(pool.key)}
+                onClick={() => togglePool(pool.key)}
+                color={pool.color}
+              >
+                {pool.name}
+              </ToggleButton>
+            ))}
+            <div className="flex items-center gap-1 ml-2 pl-2 border-l border-gray-200">
+              <button
+                onClick={selectAll}
+                className="text-xs text-indigo-600 hover:underline"
+              >
+                All
+              </button>
+              <span className="text-gray-300">|</span>
+              <button
+                onClick={selectNone}
+                className="text-xs text-indigo-600 hover:underline"
+              >
+                None
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -110,6 +207,10 @@ export default function UtilizationChart({
             <div className="h-full flex items-center justify-center text-gray-400">
               No data available
             </div>
+          ) : visiblePools.size === 0 ? (
+            <div className="h-full flex items-center justify-center text-gray-400">
+              Select at least one pool to display
+            </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
@@ -117,23 +218,19 @@ export default function UtilizationChart({
                 margin={{ top: 10, right: 30, left: 0, bottom: 5 }}
               >
                 <defs>
-                  {pools.map((pool) => {
-                    const key = `${pool.project}-${pool.symbol}`;
-                    const color = COLORS[key] || "#9ca3af";
-                    return (
-                      <linearGradient
-                        key={key}
-                        id={`gradient-${key}`}
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
-                      >
-                        <stop offset="5%" stopColor={color} stopOpacity={0.4} />
-                        <stop offset="95%" stopColor={color} stopOpacity={0.05} />
-                      </linearGradient>
-                    );
-                  })}
+                  {availablePools.map((pool) => (
+                    <linearGradient
+                      key={pool.key}
+                      id={`gradient-${pool.key}`}
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop offset="5%" stopColor={pool.color} stopOpacity={0.4} />
+                      <stop offset="95%" stopColor={pool.color} stopOpacity={0.05} />
+                    </linearGradient>
+                  ))}
                 </defs>
 
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -163,23 +260,20 @@ export default function UtilizationChart({
                 />
                 <Legend verticalAlign="top" height={36} />
 
-                {pools.map((pool) => {
-                  const key = `${pool.project}-${pool.symbol}`;
-                  const color = COLORS[key] || "#9ca3af";
-                  const name = `${pool.project === "aave-v3" ? "Aave" : "Compound"} ${pool.symbol}`;
-                  return (
+                {availablePools.map((pool) =>
+                  visiblePools.has(pool.key) ? (
                     <Area
-                      key={key}
+                      key={pool.key}
                       type="monotone"
-                      dataKey={key}
-                      name={name}
-                      stroke={color}
-                      fill={`url(#gradient-${key})`}
+                      dataKey={pool.key}
+                      name={pool.name}
+                      stroke={pool.color}
+                      fill={`url(#gradient-${pool.key})`}
                       strokeWidth={2}
                       stackId="1"
                     />
-                  );
-                })}
+                  ) : null
+                )}
               </AreaChart>
             </ResponsiveContainer>
           )}
