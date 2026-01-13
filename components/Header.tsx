@@ -11,28 +11,14 @@ export default function Header({ timestamp }: HeaderProps) {
 
   return (
     <header className="mb-8">
-      {/* Title and last updated in same row */}
+      {/* Title and subtitle */}
       <div className="flex flex-col items-center text-center">
-        <h1 className="text-4xl font-bold text-white tracking-tight">
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white">
           DeFi vs TradFi Yields
         </h1>
-        <p className="text-slate-300 mt-1 max-w-xl text-base">
-          Real-time comparison of DeFi stablecoin yields vs traditional risk-free rates
+        <p className="text-slate-400 mt-2 max-w-xl text-base">
+          Compare DeFi stablecoin yields with traditional risk-free rates
         </p>
-        {timestamp && (
-          <div className="flex items-center gap-2 mt-2 text-xs text-slate-500">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>
-              Last updated:{" "}
-              {new Date(timestamp).toLocaleString("en-US", {
-                month: "short",
-                day: "numeric",
-                hour: "numeric",
-                minute: "2-digit",
-              })}
-            </span>
-          </div>
-        )}
       </div>
 
       {/* Collapsible info box */}

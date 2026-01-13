@@ -303,16 +303,19 @@ export default function UtilizationRateChart({
   };
 
   return (
-    <div className="bg-slate-800/70 rounded-xl border border-slate-600/50 ring-1 ring-slate-700/30 overflow-hidden">
-      <div className="p-4 border-b border-slate-700">
+    <div className="bg-slate-800/60 rounded-xl border border-slate-600/40 overflow-hidden">
+      <div className="p-5 border-b border-slate-700/50">
         <div className="flex flex-col gap-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="border-l-4 border-violet-500 pl-3">
-              <h2 className="text-xl font-semibold tracking-tight text-white">
-                Utilization Rates
-              </h2>
-              <p className="text-sm text-slate-300 font-medium mt-0.5">
-                Borrowed / Supplied - shows why lending rates move
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.5)]"></span>
+                <h2 className="text-lg font-bold tracking-tight text-white">
+                  Utilization Rates
+                </h2>
+              </div>
+              <p className="text-sm text-slate-400 mt-1">
+                Borrowed / Supplied — explains rate movements
               </p>
             </div>
             <div className="flex items-center gap-4">
@@ -322,13 +325,13 @@ export default function UtilizationRateChart({
                 return (
                   <div key={pool.poolId} className="text-right">
                     <p
-                      className={`text-lg font-bold ${
+                      className={`text-xl font-extrabold tabular-nums ${
                         isAboveOptimal ? "text-amber-400" : "text-white"
                       }`}
                     >
                       {util?.toFixed(1) || "--"}%
                     </p>
-                    <p className="text-xs text-slate-400">{pool.name}</p>
+                    <p className="text-xs text-slate-500">{pool.name}</p>
                   </div>
                 );
               })}

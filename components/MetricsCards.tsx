@@ -172,6 +172,7 @@ function MetricCard({
   sparklineKey,
   sparklineColor,
   icon,
+  isPrimary,
 }: {
   title: string;
   value: string;
@@ -183,50 +184,87 @@ function MetricCard({
   sparklineKey?: string;
   sparklineColor?: string;
   icon?: React.ReactNode;
+  isPrimary?: boolean;
 }) {
   return (
-    <div className="bg-slate-800/70 rounded-xl border border-slate-600/50 ring-1 ring-slate-700/30 p-4 hover:bg-slate-700/60 hover:ring-slate-600/40 transition-all">
-      <div className="flex items-start justify-between mb-2">
-        <p className="text-base font-semibold text-white">{title}</p>
-        {icon}
-      </div>
-
-      {isLoading ? (
-        <div className="h-8 w-24 bg-slate-700 animate-pulse rounded" />
-      ) : (
-        <p
-          className={`text-2xl font-bold ${
-            isPositive === undefined
-              ? "text-white"
-              : isPositive
-                ? "text-emerald-400"
-                : "text-red-400"
+    <div
+      className={`relative rounded-xl p-5 transition-all duration-200 ${
+        isPrimary
+          ? "bg-gradient-to-br from-slate-800 to-slate-800/80 border-2 shadow-lg hover:shadow-xl"
+          : "bg-slate-800/60 border border-slate-600/40 hover:bg-slate-700/50 hover:border-slate-500/50"
+      } ${
+        isPrimary && isPositive !== undefined
+          ? isPositive
+            ? "border-emerald-500/50 shadow-emerald-500/10"
+            : "border-red-500/50 shadow-red-500/10"
+          : ""
+      }`}
+    >
+      {/* Subtle glow for primary card */}
+      {isPrimary && (
+        <div
+          className={`absolute inset-0 rounded-xl blur-xl opacity-10 ${
+            isPositive ? "bg-emerald-500" : "bg-red-500"
           }`}
-        >
-          {value}
-        </p>
+        ></div>
       )}
 
-      {subtitle && (
-        <p className="text-xs text-slate-400 mt-1">{subtitle}</p>
-      )}
-
-      {sparklineData && sparklineKey && sparklineColor && !isLoading && (
-        <div className="mt-3 -mx-2">
-          <Sparkline
-            data={sparklineData}
-            dataKey={sparklineKey}
-            color={sparklineColor}
-            referenceValue={0}
-          />
+      <div className="relative z-10">
+        <div className="flex items-start justify-between mb-3">
+          <p className={`font-bold ${isPrimary ? "text-base text-white" : "text-sm text-slate-300"}`}>
+            {title}
+          </p>
+          {icon}
         </div>
-      )}
 
-      {description && (
-        <p className="text-xs text-slate-400 mt-2 pt-2 border-t border-slate-700">
-          {description}
-        </p>
-      )}
+        {isLoading ? (
+          <div className={`${isPrimary ? "h-10 w-28" : "h-8 w-24"} bg-slate-700 animate-pulse rounded`} />
+        ) : (
+          <p
+            className={`font-extrabold tabular-nums ${
+              isPrimary ? "text-3xl" : "text-2xl"
+            } ${
+              isPositive === undefined
+                ? "text-white"
+                : isPositive
+                  ? "text-emerald-400"
+                  : "text-red-400"
+            }`}
+            style={isPrimary && isPositive !== undefined ? {
+              textShadow: isPositive
+                ? '0 0 20px rgba(52, 211, 153, 0.3)'
+                : '0 0 20px rgba(248, 113, 113, 0.3)'
+            } : undefined}
+          >
+            {value}
+          </p>
+        )}
+
+        {subtitle && (
+          <p className={`mt-1.5 ${isPrimary ? "text-sm font-medium" : "text-xs"} ${
+            subtitle.startsWith("+") ? "text-emerald-400" : subtitle.startsWith("-") ? "text-red-400" : "text-slate-400"
+          }`}>
+            {subtitle}
+          </p>
+        )}
+
+        {sparklineData && sparklineKey && sparklineColor && !isLoading && (
+          <div className="mt-3 -mx-2">
+            <Sparkline
+              data={sparklineData}
+              dataKey={sparklineKey}
+              color={sparklineColor}
+              referenceValue={0}
+            />
+          </div>
+        )}
+
+        {description && (
+          <p className={`text-slate-500 mt-3 pt-3 border-t border-slate-700/50 ${isPrimary ? "text-xs" : "text-xs"}`}>
+            {description}
+          </p>
+        )}
+      </div>
     </div>
   );
 }
@@ -278,6 +316,7 @@ export default function MetricsCards({
         sparklineData={selectedMetrics?.dataWithSpread}
         sparklineKey="computedSpread"
         sparklineColor={currentSpread >= 0 ? "#10b981" : "#ef4444"}
+        isPrimary={true}
         icon={
           <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
             currentSpread >= 0 ? "bg-emerald-500/20" : "bg-red-500/20"

@@ -12,6 +12,11 @@ body {
   background: rgb(var(--background-rgb));
 }
 
+/* Tabular numbers for aligned financial data */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
 /* Custom scrollbar for dark theme */
 ::-webkit-scrollbar {
   width: 8px;
@@ -29,4 +34,34 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgb(71, 85, 105);
+}
+
+/* Smooth animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+/* Glow animation for emphasis */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
 }

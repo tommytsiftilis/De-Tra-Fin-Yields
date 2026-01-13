@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import {
   XAxis,
   YAxis,
@@ -210,6 +210,21 @@ export default function SpreadChart({
   const [customStartDate, setCustomStartDate] = useState<string>("");
   const [customEndDate, setCustomEndDate] = useState<string>("");
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const datePickerRef = useRef<HTMLDivElement>(null);
+
+  // Close date picker when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (datePickerRef.current && !datePickerRef.current.contains(event.target as Node)) {
+        setShowDatePicker(false);
+      }
+    }
+
+    if (showDatePicker) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [showDatePicker]);
 
   const toggleSeries = (key: string) => {
     setVisibleSeries((prev) => {
@@ -329,16 +344,19 @@ export default function SpreadChart({
   }, [chartData, tickInterval]);
 
   return (
-    <div className="bg-slate-800/70 rounded-xl border border-slate-600/50 ring-1 ring-slate-700/30 overflow-hidden">
-      <div className="p-4 border-b border-slate-700">
+    <div className="bg-slate-800/60 rounded-xl border border-slate-600/40 overflow-hidden">
+      <div className="p-5 border-b border-slate-700/50">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="border-l-4 border-indigo-500 pl-3">
-              <h2 className="text-xl font-semibold tracking-tight text-white">
-                Historical Yields
-              </h2>
-              <p className="text-sm text-slate-300 font-medium mt-0.5">
-                DeFi protocol yields vs. traditional finance rates over time
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]"></span>
+                <h2 className="text-lg font-bold tracking-tight text-white">
+                  Historical Yields
+                </h2>
+              </div>
+              <p className="text-sm text-slate-400 mt-1">
+                DeFi protocol yields vs. traditional rates over time
               </p>
             </div>
 
@@ -372,7 +390,7 @@ export default function SpreadChart({
                   ))}
                 </div>
                 {/* Custom date range button */}
-                <div className="relative">
+                <div className="relative" ref={datePickerRef}>
                   <button
                     onClick={() => setShowDatePicker(!showDatePicker)}
                     className={`px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors ${
@@ -386,30 +404,30 @@ export default function SpreadChart({
                     </svg>
                   </button>
                   {showDatePicker && (
-                    <div className="absolute right-0 top-full mt-2 bg-slate-800 rounded-lg shadow-lg border border-slate-600 p-4 z-10 min-w-[280px]">
+                    <div className="absolute right-0 top-full mt-2 bg-slate-900 rounded-lg shadow-xl border border-slate-700 p-4 z-10 min-w-[280px]">
                       <div className="space-y-3">
                         <div>
-                          <label className="block text-xs font-medium text-slate-300 mb-1">Start Date</label>
+                          <label className="block text-xs font-medium text-slate-400 mb-1.5">Start Date</label>
                           <input
                             type="date"
                             value={customStartDate}
                             onChange={(e) => setCustomStartDate(e.target.value)}
-                            className="w-full px-3 py-2 border border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 [color-scheme:dark]"
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-slate-300 mb-1">End Date</label>
+                          <label className="block text-xs font-medium text-slate-400 mb-1.5">End Date</label>
                           <input
                             type="date"
                             value={customEndDate}
                             onChange={(e) => setCustomEndDate(e.target.value)}
-                            className="w-full px-3 py-2 border border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 [color-scheme:dark]"
                           />
                         </div>
                         <button
                           onClick={applyCustomDateRange}
                           disabled={!customStartDate || !customEndDate}
-                          className="w-full px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                           Apply Range
                         </button>

@@ -126,13 +126,16 @@ export default function HeroSection({
     sublabel: o.description,
   }));
 
+  // Calculate dollar example for context (on $100k)
+  const dollarExample = Math.abs(spread * 1000);
+
   return (
-    <div className="bg-slate-800/80 rounded-2xl p-6 md:p-8 border border-slate-600/60 ring-1 ring-slate-700/50 backdrop-blur-sm shadow-sm">
+    <div className="bg-slate-800/70 rounded-2xl p-6 md:p-8 border border-slate-600/50">
       {/* Title */}
       <div className="text-center mb-6">
-        <p className="text-lg font-bold text-white uppercase tracking-wide">
+        <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight">
           Current Yield Comparison
-        </p>
+        </h2>
       </div>
 
       {/* Main comparison */}
@@ -141,8 +144,8 @@ export default function HeroSection({
         <div className="text-center md:text-right">
           <div className="inline-block">
             <div className="flex items-center justify-center md:justify-end gap-2 mb-2">
-              <span className="w-3 h-3 rounded-full bg-indigo-500"></span>
-              <span className="text-sm font-semibold text-indigo-300">DeFi Stablecoin</span>
+              <span className="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+              <span className="text-sm font-semibold text-indigo-300">DeFi Yield</span>
             </div>
 
             {/* DeFi selector */}
@@ -156,13 +159,13 @@ export default function HeroSection({
             </div>
 
             {isLoading ? (
-              <Skeleton className="h-12 w-32 mx-auto md:ml-auto md:mr-0" />
+              <Skeleton className="h-14 w-36 mx-auto md:ml-auto md:mr-0" />
             ) : (
-              <p className="text-4xl md:text-5xl font-bold text-white" style={{ textShadow: '0 0 20px rgba(255,255,255,0.3)' }}>
+              <p className="text-4xl md:text-5xl font-bold text-white tabular-nums tracking-tight">
                 {formatPercent(defiRate)}
               </p>
             )}
-            <p className="text-xs text-slate-300 mt-1">
+            <p className="text-xs text-slate-400 mt-1.5">
               {defiLabel.asset} on {defiLabel.protocol}
             </p>
           </div>
@@ -170,22 +173,16 @@ export default function HeroSection({
 
         {/* Spread indicator (center) */}
         <div className="flex flex-col items-center">
-          <div
-            className={`px-6 py-4 rounded-xl border-2 ${
-              spread >= 0
-                ? "bg-emerald-900/20 border-emerald-500/50"
-                : "bg-red-900/20 border-red-500/50"
-            }`}
-          >
-            <p className="text-xs font-medium text-slate-500 text-center mb-1">
-              SPREAD
+          <div className="px-6 py-4 rounded-xl bg-slate-700/50 border border-slate-600/50">
+            <p className="text-xs font-semibold text-slate-400 text-center mb-1 uppercase tracking-wide">
+              Spread
             </p>
             {isLoading ? (
               <Skeleton className="h-8 w-24 mx-auto" />
             ) : (
               <>
                 <p
-                  className={`text-3xl font-bold text-center ${
+                  className={`text-3xl md:text-4xl font-bold text-center tabular-nums tracking-tight ${
                     spread >= 0 ? "text-emerald-400" : "text-red-400"
                   }`}
                 >
@@ -194,11 +191,11 @@ export default function HeroSection({
                 </p>
                 <p
                   className={`text-xs text-center mt-1 ${
-                    spread >= 0 ? "text-emerald-400" : "text-red-400"
+                    spread >= 0 ? "text-emerald-400/70" : "text-red-400/70"
                   }`}
                 >
                   {spread >= 0
-                    ? `${spreadPercent.toFixed(0)}% premium over risk-free`
+                    ? `${spreadPercent.toFixed(0)}% premium`
                     : `${Math.abs(spreadPercent).toFixed(0)}% below risk-free`}
                 </p>
               </>
@@ -207,9 +204,9 @@ export default function HeroSection({
 
           {/* Visual spread bar */}
           <div className="w-full max-w-xs mt-4">
-            <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+            <div className="h-2 bg-slate-700/60 rounded-full overflow-hidden">
               <div
-                className={`h-full transition-all duration-500 ${
+                className={`h-full transition-all duration-500 rounded-full ${
                   spread >= 0 ? "bg-emerald-500" : "bg-red-500"
                 }`}
                 style={{
@@ -229,8 +226,8 @@ export default function HeroSection({
         <div className="text-center md:text-left">
           <div className="inline-block">
             <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-              <span className="w-3 h-3 rounded-full bg-amber-500"></span>
-              <span className="text-sm font-semibold text-amber-400">TradFi Risk-Free</span>
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+              <span className="text-sm font-semibold text-amber-400">TradFi Rate</span>
             </div>
 
             {/* TradFi selector */}
@@ -244,13 +241,13 @@ export default function HeroSection({
             </div>
 
             {isLoading ? (
-              <Skeleton className="h-12 w-32 mx-auto md:mr-auto md:ml-0" />
+              <Skeleton className="h-14 w-36 mx-auto md:mr-auto md:ml-0" />
             ) : (
-              <p className="text-4xl md:text-5xl font-bold text-white" style={{ textShadow: '0 0 20px rgba(255,255,255,0.3)' }}>
+              <p className="text-4xl md:text-5xl font-bold text-white tabular-nums tracking-tight">
                 {formatPercent(tradfiRate)}
               </p>
             )}
-            <p className="text-xs text-slate-300 mt-1">
+            <p className="text-xs text-slate-400 mt-1.5">
               {tradfiLabel}
             </p>
           </div>
@@ -258,20 +255,12 @@ export default function HeroSection({
       </div>
 
       {/* Context footer */}
-      <div className="mt-6 pt-4 border-t border-slate-700">
-        <p className="text-xs text-slate-400 text-center">
-          <span className="font-medium">What this means:</span> {defiLabel.asset} on {defiLabel.protocol}{" "}
-          currently offers{" "}
-          {spread >= 0 ? (
-            <span className="text-emerald-600 font-medium">
-              {formatPercent(Math.abs(spread))} more
-            </span>
-          ) : (
-            <span className="text-red-600 font-medium">
-              {formatPercent(Math.abs(spread))} less
-            </span>
-          )}{" "}
-          yield than {tradfiLabel}. This spread reflects the additional risk/reward of decentralized protocols.
+      <div className="mt-6 pt-4 border-t border-slate-700/50">
+        <p className="text-xs text-slate-500 text-center">
+          {spread >= 0
+            ? `DeFi currently offers ${formatPercent(Math.abs(spread))} more yield, reflecting smart contract risk premium.`
+            : `TradFi currently pays ${formatPercent(Math.abs(spread))} more — capital flowing to risk-free assets.`
+          }
         </p>
       </div>
     </div>

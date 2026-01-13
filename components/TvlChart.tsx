@@ -261,25 +261,25 @@ export default function TvlChart({
     : [];
 
   return (
-    <div className="bg-slate-800/70 rounded-xl border border-slate-600/50 ring-1 ring-slate-700/30 overflow-hidden">
-      <div className="p-4 border-b border-slate-700">
+    <div className="bg-slate-800/60 rounded-xl border border-slate-600/40 overflow-hidden">
+      <div className="p-5 border-b border-slate-700/50">
         <div className="flex flex-col gap-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <div className="flex items-center gap-2 border-l-4 border-cyan-500 pl-3">
-                <span className="w-2 h-2 rounded-full bg-cyan-500"></span>
-                <h2 className="text-xl font-semibold tracking-tight text-white">
-                  DeFi Total Value Locked
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.5)]"></span>
+                <h2 className="text-lg font-bold tracking-tight text-white">
+                  Total Value Locked
                 </h2>
               </div>
-              <p className="text-sm text-slate-300 font-medium mt-0.5 pl-3 ml-1">
-                Capital deposited in tracked lending pools
+              <p className="text-sm text-slate-400 mt-1">
+                Capital deposited in lending pools
               </p>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <p className="text-2xl font-bold text-white">{formatTvl(totalTvl)}</p>
-                <p className="text-xs text-slate-400">Selected pools TVL</p>
+                <p className="text-2xl font-extrabold text-white tabular-nums">{formatTvl(totalTvl)}</p>
+                <p className="text-xs text-slate-500">Selected pools TVL</p>
               </div>
             </div>
           </div>
