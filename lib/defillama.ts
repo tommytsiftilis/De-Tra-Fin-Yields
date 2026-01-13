@@ -24,9 +24,9 @@ export const TRACKED_POOLS = {
     chain: "Ethereum",
   },
   MORPHO_USDC: {
-    poolId: "a44febf3-34f6-4cd5-8ab1-f246ebe49f9e",
+    poolId: "b55f43a8-f444-4cd8-a3a4-0a4e786ba566",
     displayName: "Morpho (Steakhouse)",
-    symbol: "USDC",
+    symbol: "STEAKUSDC",
     chain: "Ethereum",
   },
 };
