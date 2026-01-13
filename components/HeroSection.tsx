@@ -59,7 +59,7 @@ function getTradfiLabel(selection: TradfiSelection): string {
 
 function Skeleton({ className }: { className?: string }) {
   return (
-    <div className={`animate-pulse bg-slate-300 rounded ${className || ""}`} />
+    <div className={`animate-pulse bg-slate-700 rounded ${className || ""}`} />
   );
 }
 
@@ -79,7 +79,7 @@ function SelectButton({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`appearance-none bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 pr-8 text-sm font-medium cursor-pointer hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-offset-1 ${colorClass}`}
+        className={`appearance-none bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 pr-8 text-sm font-medium cursor-pointer hover:border-slate-500 focus:outline-none focus:ring-2 focus:ring-offset-1 ${colorClass}`}
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>
@@ -127,10 +127,10 @@ export default function HeroSection({
   }));
 
   return (
-    <div className="bg-slate-100 rounded-2xl p-6 md:p-8 border border-slate-300 shadow-sm">
+    <div className="bg-slate-900/50 rounded-2xl p-6 md:p-8 border border-slate-700/50 backdrop-blur-sm shadow-sm">
       {/* Title */}
       <div className="text-center mb-6">
-        <p className="text-sm font-medium text-slate-500 uppercase tracking-wide">
+        <p className="text-sm font-medium text-slate-400 uppercase tracking-wide">
           Current Yield Comparison
         </p>
       </div>
@@ -142,7 +142,7 @@ export default function HeroSection({
           <div className="inline-block">
             <div className="flex items-center justify-center md:justify-end gap-2 mb-2">
               <span className="w-3 h-3 rounded-full bg-indigo-500"></span>
-              <span className="text-sm font-medium text-indigo-600">DeFi Stablecoin</span>
+              <span className="text-sm font-medium text-indigo-400">DeFi Stablecoin</span>
             </div>
 
             {/* DeFi selector */}
@@ -158,11 +158,11 @@ export default function HeroSection({
             {isLoading ? (
               <Skeleton className="h-12 w-32 mx-auto md:ml-auto md:mr-0" />
             ) : (
-              <p className="text-4xl md:text-5xl font-bold text-slate-800">
+              <p className="text-4xl md:text-5xl font-bold text-slate-100">
                 {formatPercent(defiRate)}
               </p>
             )}
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-400 mt-1">
               {defiLabel.asset} on {defiLabel.protocol}
             </p>
           </div>
@@ -177,7 +177,7 @@ export default function HeroSection({
                 : "bg-red-900/20 border-red-500/50"
             }`}
           >
-            <p className="text-xs font-medium text-slate-400 text-center mb-1">
+            <p className="text-xs font-medium text-slate-500 text-center mb-1">
               SPREAD
             </p>
             {isLoading ? (
@@ -207,7 +207,7 @@ export default function HeroSection({
 
           {/* Visual spread bar */}
           <div className="w-full max-w-xs mt-4">
-            <div className="h-2 bg-slate-300 rounded-full overflow-hidden">
+            <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
               <div
                 className={`h-full transition-all duration-500 ${
                   spread >= 0 ? "bg-emerald-500" : "bg-red-500"
@@ -218,7 +218,7 @@ export default function HeroSection({
                 }}
               />
             </div>
-            <div className="flex justify-between text-xs text-slate-400 mt-1">
+            <div className="flex justify-between text-xs text-slate-500 mt-1">
               <span>Risk-free</span>
               <span>+10%</span>
             </div>
@@ -246,11 +246,11 @@ export default function HeroSection({
             {isLoading ? (
               <Skeleton className="h-12 w-32 mx-auto md:mr-auto md:ml-0" />
             ) : (
-              <p className="text-4xl md:text-5xl font-bold text-slate-800">
+              <p className="text-4xl md:text-5xl font-bold text-slate-100">
                 {formatPercent(tradfiRate)}
               </p>
             )}
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-400 mt-1">
               {tradfiLabel}
             </p>
           </div>
@@ -258,8 +258,8 @@ export default function HeroSection({
       </div>
 
       {/* Context footer */}
-      <div className="mt-6 pt-4 border-t border-slate-300">
-        <p className="text-xs text-slate-500 text-center">
+      <div className="mt-6 pt-4 border-t border-slate-700">
+        <p className="text-xs text-slate-400 text-center">
           <span className="font-medium">What this means:</span> {defiLabel.asset} on {defiLabel.protocol}{" "}
           currently offers{" "}
           {spread >= 0 ? (

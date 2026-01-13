@@ -185,19 +185,19 @@ function MetricCard({
   icon?: React.ReactNode;
 }) {
   return (
-    <div className="bg-slate-100 rounded-xl border border-slate-300 p-4 hover:shadow-md transition-shadow">
+    <div className="bg-slate-900/50 rounded-xl border border-slate-700/50 p-4 hover:bg-slate-800/50 transition-shadow">
       <div className="flex items-start justify-between mb-2">
-        <p className="text-sm font-medium text-slate-500">{title}</p>
+        <p className="text-sm font-medium text-slate-400">{title}</p>
         {icon}
       </div>
 
       {isLoading ? (
-        <div className="h-8 w-24 bg-slate-300 animate-pulse rounded" />
+        <div className="h-8 w-24 bg-slate-700 animate-pulse rounded" />
       ) : (
         <p
           className={`text-2xl font-bold ${
             isPositive === undefined
-              ? "text-slate-800"
+              ? "text-slate-100"
               : isPositive
                 ? "text-emerald-600"
                 : "text-red-600"
@@ -208,7 +208,7 @@ function MetricCard({
       )}
 
       {subtitle && (
-        <p className="text-xs text-slate-400 mt-1">{subtitle}</p>
+        <p className="text-xs text-slate-500 mt-1">{subtitle}</p>
       )}
 
       {sparklineData && sparklineKey && sparklineColor && !isLoading && (
@@ -223,7 +223,7 @@ function MetricCard({
       )}
 
       {description && (
-        <p className="text-xs text-slate-500 mt-2 pt-2 border-t border-slate-200">
+        <p className="text-xs text-slate-400 mt-2 pt-2 border-t border-slate-700">
           {description}
         </p>
       )}
@@ -280,7 +280,7 @@ export default function MetricsCards({
         sparklineColor={currentSpread >= 0 ? "#10b981" : "#ef4444"}
         icon={
           <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-            currentSpread >= 0 ? "bg-emerald-100" : "bg-red-100"
+            currentSpread >= 0 ? "bg-emerald-500/20" : "bg-red-500/20"
           }`}>
             {currentSpread >= 0 ? (
               <svg className="w-3 h-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -303,7 +303,7 @@ export default function MetricsCards({
         isLoading={isLoading}
         isPositive={selectedMetrics ? selectedMetrics.averageSpread > 0 : undefined}
         icon={
-          <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center">
+          <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center">
             <svg className="w-3 h-3 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
@@ -319,7 +319,7 @@ export default function MetricsCards({
         isLoading={isLoading}
         isPositive={true}
         icon={
-          <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center">
+          <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
             <svg className="w-3 h-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
             </svg>
@@ -335,7 +335,7 @@ export default function MetricsCards({
         isLoading={isLoading}
         isPositive={selectedMetrics ? selectedMetrics.minSpread.value > 0 : undefined}
         icon={
-          <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center">
+          <div className="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center">
             <svg className="w-3 h-3 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
             </svg>

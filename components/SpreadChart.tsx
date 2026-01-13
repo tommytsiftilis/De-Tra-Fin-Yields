@@ -88,7 +88,7 @@ function ToggleButton({
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
         active
           ? "bg-gray-900 text-white"
-          : "bg-slate-300 text-slate-500 hover:bg-gray-200"
+          : "bg-slate-700 text-slate-400 hover:bg-slate-600"
       }`}
     >
       <span
@@ -145,8 +145,8 @@ function CustomTooltip({
   }
 
   return (
-    <div className="bg-slate-50 border border-slate-300 rounded-lg shadow-lg p-3 min-w-[200px]">
-      <p className="text-xs font-medium text-slate-500 mb-2">
+    <div className="bg-slate-800 border border-slate-600 rounded-lg shadow-lg p-3 min-w-[200px]">
+      <p className="text-xs font-medium text-slate-400 mb-2">
         {formatTooltipDate(label as string)}
       </p>
 
@@ -160,9 +160,9 @@ function CustomTooltip({
                   className="w-2 h-2 rounded-full"
                   style={{ backgroundColor: rate.color }}
                 />
-                <span className="text-xs text-slate-600">{rate.name}</span>
+                <span className="text-xs text-slate-300">{rate.name}</span>
               </div>
-              <span className="text-xs font-mono font-medium text-slate-800">
+              <span className="text-xs font-mono font-medium text-slate-100">
                 {formatPercent(rate.value)}
               </span>
             </div>
@@ -174,7 +174,7 @@ function CustomTooltip({
       {spreadInfo && (
         <div className="border-t border-gray-100 pt-2 mt-2">
           <div className="flex items-center justify-between gap-4">
-            <span className="text-xs text-slate-500">Spread</span>
+            <span className="text-xs text-slate-400">Spread</span>
             <span
               className={`text-xs font-mono font-bold ${
                 spreadInfo.spread >= 0 ? "text-emerald-600" : "text-red-600"
@@ -184,7 +184,7 @@ function CustomTooltip({
               {formatPercent(spreadInfo.spread)}
             </span>
           </div>
-          <p className="text-[10px] text-slate-400 mt-0.5">
+          <p className="text-[10px] text-slate-500 mt-0.5">
             {spreadInfo.defiName} − {spreadInfo.tradfiName}
           </p>
         </div>
@@ -326,15 +326,15 @@ export default function SpreadChart({
   }, [chartData, tickInterval]);
 
   return (
-    <div className="bg-slate-100 rounded-xl border border-slate-300 overflow-hidden">
-      <div className="p-4 border-b border-slate-300">
+    <div className="bg-slate-900/50 rounded-xl border border-slate-700/50 overflow-hidden">
+      <div className="p-4 border-b border-slate-700">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-lg font-semibold text-slate-800">
+              <h2 className="text-lg font-semibold text-slate-100">
                 Historical Yields
               </h2>
-              <p className="text-sm text-slate-500 mt-0.5">
+              <p className="text-sm text-slate-400 mt-0.5">
                 DeFi protocol yields vs. traditional finance rates over time
               </p>
             </div>
@@ -348,12 +348,12 @@ export default function SpreadChart({
                   onChange={(e) => setShowSpreadArea(e.target.checked)}
                   className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                 />
-                <span className="text-slate-600">Spread area</span>
+                <span className="text-slate-300">Spread area</span>
               </label>
 
               {/* Time range selector */}
               <div className="flex items-center gap-2">
-                <div className="flex rounded-lg border border-slate-300 overflow-hidden">
+                <div className="flex rounded-lg border border-slate-600 overflow-hidden">
                   {TIME_RANGES.map((range) => (
                     <button
                       key={range.value}
@@ -361,7 +361,7 @@ export default function SpreadChart({
                       className={`px-3 py-1.5 text-sm font-medium transition-colors ${
                         timeRange === range.value
                           ? "bg-indigo-600 text-white"
-                          : "bg-slate-50 text-slate-600 hover:bg-slate-200"
+                          : "bg-slate-800 text-slate-300 hover:bg-slate-700"
                       }`}
                     >
                       {range.label}
@@ -375,7 +375,7 @@ export default function SpreadChart({
                     className={`px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors ${
                       timeRange === "custom"
                         ? "bg-indigo-600 text-white border-indigo-600"
-                        : "bg-slate-50 text-slate-600 border-slate-300 hover:bg-slate-200"
+                        : "bg-slate-800 text-slate-300 border-slate-600 hover:bg-slate-700"
                     }`}
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -383,24 +383,24 @@ export default function SpreadChart({
                     </svg>
                   </button>
                   {showDatePicker && (
-                    <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-slate-200 p-4 z-10 min-w-[280px]">
+                    <div className="absolute right-0 top-full mt-2 bg-slate-800 rounded-lg shadow-lg border border-slate-600 p-4 z-10 min-w-[280px]">
                       <div className="space-y-3">
                         <div>
-                          <label className="block text-xs font-medium text-slate-600 mb-1">Start Date</label>
+                          <label className="block text-xs font-medium text-slate-300 mb-1">Start Date</label>
                           <input
                             type="date"
                             value={customStartDate}
                             onChange={(e) => setCustomStartDate(e.target.value)}
-                            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="w-full px-3 py-2 border border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-slate-600 mb-1">End Date</label>
+                          <label className="block text-xs font-medium text-slate-300 mb-1">End Date</label>
                           <input
                             type="date"
                             value={customEndDate}
                             onChange={(e) => setCustomEndDate(e.target.value)}
-                            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="w-full px-3 py-2 border border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                           />
                         </div>
                         <button
@@ -420,7 +420,7 @@ export default function SpreadChart({
 
           {/* Rates toggles */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs text-slate-500 mr-1">Rates:</span>
+            <span className="text-xs text-slate-400 mr-1">Rates:</span>
             {DATA_SERIES.map((series) => (
               <ToggleButton
                 key={series.key}
@@ -432,7 +432,7 @@ export default function SpreadChart({
                 {series.name}
               </ToggleButton>
             ))}
-            <div className="flex items-center gap-1 ml-2 pl-2 border-l border-slate-300">
+            <div className="flex items-center gap-1 ml-2 pl-2 border-l border-slate-600">
               <button
                 onClick={selectAllSeries}
                 className="text-xs text-indigo-600 hover:underline"
@@ -492,20 +492,20 @@ export default function SpreadChart({
                   </linearGradient>
                 </defs>
 
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                 <XAxis
                   dataKey="date"
                   ticks={ticks}
                   tickFormatter={(date) => formatAxisDate(date, timeRange)}
                   tick={{ fontSize: 11, fill: "#6b7280" }}
-                  stroke="#d1d5db"
+                  stroke="#475569"
                   tickLine={false}
                   interval="preserveStartEnd"
                 />
                 <YAxis
                   tickFormatter={(value) => `${value.toFixed(0)}%`}
                   tick={{ fontSize: 11, fill: "#6b7280" }}
-                  stroke="#d1d5db"
+                  stroke="#475569"
                   tickLine={false}
                   axisLine={false}
                   domain={["auto", "auto"]}
@@ -524,7 +524,7 @@ export default function SpreadChart({
                 />
 
                 {/* Reference line at 0 */}
-                <ReferenceLine y={0} stroke="#d1d5db" strokeDasharray="3 3" />
+                <ReferenceLine y={0} stroke="#475569" strokeDasharray="3 3" />
 
                 {/* Spread area based on selected comparison */}
                 {showSpreadArea && (
@@ -559,11 +559,11 @@ export default function SpreadChart({
         </div>
       </div>
 
-      <div className="px-4 py-3 bg-slate-200 border-t border-slate-300">
+      <div className="px-4 py-3 bg-slate-800/60 border-t border-slate-700">
         <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs">
           <span className="flex items-center gap-1.5">
             <span className="w-4 h-0.5 bg-indigo-500"></span>
-            <span className="text-slate-600">DeFi yields (solid lines)</span>
+            <span className="text-slate-300">DeFi yields (solid lines)</span>
           </span>
           <span className="flex items-center gap-1.5">
             <span
@@ -573,13 +573,13 @@ export default function SpreadChart({
                   "repeating-linear-gradient(90deg, #f59e0b 0px, #f59e0b 3px, transparent 3px, transparent 6px)",
               }}
             ></span>
-            <span className="text-slate-600">TradFi rates (dashed lines)</span>
+            <span className="text-slate-300">TradFi rates (dashed lines)</span>
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-4 h-3 bg-emerald-500/30 rounded"></span>
-            <span className="text-slate-600">Spread areas</span>
+            <span className="text-slate-300">Spread areas</span>
           </span>
-          <span className="text-slate-400 ml-auto">
+          <span className="text-slate-500 ml-auto">
             Tip: Select 1 DeFi + 1 TradFi to see spread in tooltip
           </span>
         </div>

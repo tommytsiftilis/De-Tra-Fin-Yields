@@ -107,7 +107,7 @@ function ToggleButton({
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
         active
           ? "bg-gray-900 text-white"
-          : "bg-slate-300 text-slate-500 hover:bg-slate-400"
+          : "bg-slate-700 text-slate-400 hover:bg-slate-600"
       }`}
     >
       <span
@@ -227,8 +227,8 @@ export default function UtilizationRateChart({
     const dataPoint = mergedData.find((d) => d.date === label);
 
     return (
-      <div className="bg-slate-50 border border-slate-300 rounded-lg shadow-lg p-3 min-w-[220px]">
-        <p className="text-xs font-medium text-slate-500 mb-2">
+      <div className="bg-slate-800 border border-slate-600 rounded-lg shadow-lg p-3 min-w-[220px]">
+        <p className="text-xs font-medium text-slate-400 mb-2">
           {formatShortDate(label)}
         </p>
         <div className="space-y-2">
@@ -248,18 +248,18 @@ export default function UtilizationRateChart({
                       className="w-2 h-2 rounded-full"
                       style={{ backgroundColor: entry.color }}
                     />
-                    <span className="text-xs text-slate-600">{poolConfig.name}</span>
+                    <span className="text-xs text-slate-300">{poolConfig.name}</span>
                   </div>
                   <span
                     className={`text-xs font-mono font-bold ${
-                      isAboveOptimal ? "text-amber-600" : "text-slate-800"
+                      isAboveOptimal ? "text-amber-600" : "text-slate-100"
                     }`}
                   >
                     {entry.value.toFixed(1)}%
                   </span>
                 </div>
                 {supply && borrow && (
-                  <div className="pl-4 text-[10px] text-slate-400">
+                  <div className="pl-4 text-[10px] text-slate-500">
                     {formatTvl(borrow)} borrowed / {formatTvl(supply)} supplied
                   </div>
                 )}
@@ -272,15 +272,15 @@ export default function UtilizationRateChart({
   };
 
   return (
-    <div className="bg-slate-100 rounded-xl border border-slate-300 overflow-hidden">
-      <div className="p-4 border-b border-slate-300">
+    <div className="bg-slate-900/50 rounded-xl border border-slate-700/50 overflow-hidden">
+      <div className="p-4 border-b border-slate-700">
         <div className="flex flex-col gap-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-slate-800">
+              <h2 className="text-lg font-semibold text-slate-100">
                 Utilization Rates
               </h2>
-              <p className="text-sm text-slate-500 mt-0.5">
+              <p className="text-sm text-slate-400 mt-0.5">
                 Borrowed / Supplied — explains why lending rates move
               </p>
             </div>
@@ -292,12 +292,12 @@ export default function UtilizationRateChart({
                   <div key={pool.poolId} className="text-right">
                     <p
                       className={`text-lg font-bold ${
-                        isAboveOptimal ? "text-amber-600" : "text-slate-800"
+                        isAboveOptimal ? "text-amber-600" : "text-slate-100"
                       }`}
                     >
                       {util?.toFixed(1) || "--"}%
                     </p>
-                    <p className="text-xs text-slate-500">{pool.name}</p>
+                    <p className="text-xs text-slate-400">{pool.name}</p>
                   </div>
                 );
               })}
@@ -308,7 +308,7 @@ export default function UtilizationRateChart({
           <div className="flex flex-wrap items-center justify-between gap-3">
             {/* Pool toggles */}
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs text-slate-500 mr-1">Show:</span>
+              <span className="text-xs text-slate-400 mr-1">Show:</span>
               {availablePools.map((pool) => (
                 <ToggleButton
                   key={pool.poolId}
@@ -319,7 +319,7 @@ export default function UtilizationRateChart({
                   {pool.name}
                 </ToggleButton>
               ))}
-              <div className="flex items-center gap-1 ml-2 pl-2 border-l border-slate-300">
+              <div className="flex items-center gap-1 ml-2 pl-2 border-l border-slate-600">
                 <button
                   onClick={selectAll}
                   className="text-xs text-indigo-600 hover:underline"
@@ -337,7 +337,7 @@ export default function UtilizationRateChart({
             </div>
 
             {/* Time range selector */}
-            <div className="flex rounded-lg border border-slate-300 overflow-hidden">
+            <div className="flex rounded-lg border border-slate-600 overflow-hidden">
               {TIME_RANGES.map((range) => (
                 <button
                   key={range.value}
@@ -345,7 +345,7 @@ export default function UtilizationRateChart({
                   className={`px-2.5 py-1 text-xs font-medium transition-colors ${
                     timeRange === range.value
                       ? "bg-indigo-600 text-white"
-                      : "bg-slate-50 text-slate-600 hover:bg-slate-200"
+                      : "bg-slate-800 text-slate-300 hover:bg-slate-700"
                   }`}
                 >
                   {range.label}
@@ -376,18 +376,18 @@ export default function UtilizationRateChart({
                 data={mergedData}
                 margin={{ top: 10, right: 30, left: 0, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                 <XAxis
                   dataKey="date"
                   tickFormatter={(date) => formatAxisDate(date, timeRange)}
                   tick={{ fontSize: 11, fill: "#6b7280" }}
-                  stroke="#d1d5db"
+                  stroke="#475569"
                   tickLine={false}
                 />
                 <YAxis
                   tickFormatter={(value) => `${value}%`}
                   tick={{ fontSize: 11, fill: "#6b7280" }}
-                  stroke="#d1d5db"
+                  stroke="#475569"
                   tickLine={false}
                   axisLine={false}
                   domain={[0, 100]}
@@ -427,8 +427,8 @@ export default function UtilizationRateChart({
         </div>
       </div>
 
-      <div className="px-4 py-3 bg-slate-200 border-t border-slate-300">
-        <p className="text-xs text-slate-500">
+      <div className="px-4 py-3 bg-slate-800/60 border-t border-slate-700">
+        <p className="text-xs text-slate-400">
           <span className="font-medium">Why utilization matters:</span> When utilization exceeds the optimal rate (~92%),
           interest rates increase sharply to incentivize more deposits. High utilization = higher yields but less liquidity.
         </p>

@@ -7,7 +7,20 @@ const config: Config = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        // Custom dark theme colors
+        dark: {
+          bg: "#020617",        // slate-950
+          card: "#0f172a",      // slate-900
+          elevated: "#1e293b",  // slate-800
+          border: "#334155",    // slate-700
+        },
+      },
+      backdropBlur: {
+        xs: "2px",
+      },
+    },
   },
   plugins: [],
 };

@@ -86,7 +86,7 @@ function ToggleButton({
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
         active
           ? "bg-gray-900 text-white"
-          : "bg-slate-300 text-slate-500 hover:bg-slate-400"
+          : "bg-slate-700 text-slate-400 hover:bg-slate-600"
       }`}
     >
       <span
@@ -209,22 +209,22 @@ export default function TvlChart({
     : [];
 
   return (
-    <div className="bg-slate-100 rounded-xl border border-slate-300 overflow-hidden">
-      <div className="p-4 border-b border-slate-300">
+    <div className="bg-slate-900/50 rounded-xl border border-slate-700/50 overflow-hidden">
+      <div className="p-4 border-b border-slate-700">
         <div className="flex flex-col gap-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-slate-800">
+              <h2 className="text-lg font-semibold text-slate-100">
                 DeFi Total Value Locked
               </h2>
-              <p className="text-sm text-slate-500 mt-0.5">
+              <p className="text-sm text-slate-400 mt-0.5">
                 Capital deposited in tracked lending pools
               </p>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <p className="text-2xl font-bold text-slate-800">{formatTvl(totalTvl)}</p>
-                <p className="text-xs text-slate-500">Selected pools TVL</p>
+                <p className="text-2xl font-bold text-slate-100">{formatTvl(totalTvl)}</p>
+                <p className="text-xs text-slate-400">Selected pools TVL</p>
               </div>
             </div>
           </div>
@@ -233,7 +233,7 @@ export default function TvlChart({
           <div className="flex flex-wrap items-center justify-between gap-3">
             {/* Pool toggles */}
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs text-slate-500 mr-1">Show:</span>
+              <span className="text-xs text-slate-400 mr-1">Show:</span>
               {availablePools.map((pool) => (
                 <ToggleButton
                   key={pool.key}
@@ -244,7 +244,7 @@ export default function TvlChart({
                   {pool.name}
                 </ToggleButton>
               ))}
-              <div className="flex items-center gap-1 ml-2 pl-2 border-l border-slate-300">
+              <div className="flex items-center gap-1 ml-2 pl-2 border-l border-slate-600">
                 <button
                   onClick={selectAll}
                   className="text-xs text-indigo-600 hover:underline"
@@ -263,7 +263,7 @@ export default function TvlChart({
 
             {/* Time range selector */}
             <div className="flex items-center gap-2">
-              <div className="flex rounded-lg border border-slate-300 overflow-hidden">
+              <div className="flex rounded-lg border border-slate-600 overflow-hidden">
                 {TIME_RANGES.map((range) => (
                   <button
                     key={range.value}
@@ -271,7 +271,7 @@ export default function TvlChart({
                     className={`px-2.5 py-1 text-xs font-medium transition-colors ${
                       timeRange === range.value
                         ? "bg-indigo-600 text-white"
-                        : "bg-slate-50 text-slate-600 hover:bg-slate-200"
+                        : "bg-slate-800 text-slate-300 hover:bg-slate-700"
                     }`}
                   >
                     {range.label}
@@ -285,7 +285,7 @@ export default function TvlChart({
                   className={`px-2.5 py-1 text-xs font-medium rounded-lg border transition-colors ${
                     timeRange === "custom"
                       ? "bg-indigo-600 text-white border-indigo-600"
-                      : "bg-slate-50 text-slate-600 border-slate-300 hover:bg-slate-200"
+                      : "bg-slate-800 text-slate-300 border-slate-600 hover:bg-slate-700"
                   }`}
                 >
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -293,24 +293,24 @@ export default function TvlChart({
                   </svg>
                 </button>
                 {showDatePicker && (
-                  <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-slate-200 p-4 z-10 min-w-[280px]">
+                  <div className="absolute right-0 top-full mt-2 bg-slate-800 rounded-lg shadow-lg border border-slate-600 p-4 z-10 min-w-[280px]">
                     <div className="space-y-3">
                       <div>
-                        <label className="block text-xs font-medium text-slate-600 mb-1">Start Date</label>
+                        <label className="block text-xs font-medium text-slate-300 mb-1">Start Date</label>
                         <input
                           type="date"
                           value={customStartDate}
                           onChange={(e) => setCustomStartDate(e.target.value)}
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          className="w-full px-3 py-2 border border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-slate-600 mb-1">End Date</label>
+                        <label className="block text-xs font-medium text-slate-300 mb-1">End Date</label>
                         <input
                           type="date"
                           value={customEndDate}
                           onChange={(e) => setCustomEndDate(e.target.value)}
-                          className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          className="w-full px-3 py-2 border border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
                       </div>
                       <button
@@ -349,18 +349,18 @@ export default function TvlChart({
                 data={mergedData}
                 margin={{ top: 10, right: 30, left: 0, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                 <XAxis
                   dataKey="date"
                   tickFormatter={(date) => formatAxisDate(date, timeRange)}
                   tick={{ fontSize: 11, fill: "#6b7280" }}
-                  stroke="#d1d5db"
+                  stroke="#475569"
                   tickLine={false}
                 />
                 <YAxis
                   tickFormatter={formatTvl}
                   tick={{ fontSize: 11, fill: "#6b7280" }}
-                  stroke="#d1d5db"
+                  stroke="#475569"
                   tickLine={false}
                   axisLine={false}
                 />
@@ -368,8 +368,8 @@ export default function TvlChart({
                   formatter={(value: number) => [formatTvl(value)]}
                   labelFormatter={(label) => formatShortDate(label)}
                   contentStyle={{
-                    backgroundColor: "white",
-                    border: "1px solid #e5e7eb",
+                    backgroundColor: "#1e293b",
+                    border: "1px solid #475569",
                     borderRadius: "8px",
                     boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                   }}
@@ -395,8 +395,8 @@ export default function TvlChart({
         </div>
       </div>
 
-      <div className="px-4 py-3 bg-slate-200 border-t border-slate-300">
-        <p className="text-xs text-slate-500">
+      <div className="px-4 py-3 bg-slate-800/60 border-t border-slate-700">
+        <p className="text-xs text-slate-400">
           <span className="font-medium">Why TVL matters:</span> Higher TVL generally indicates more trust in a protocol.
           TVL changes can also affect yields - more deposits typically lower rates as supply increases.
         </p>
