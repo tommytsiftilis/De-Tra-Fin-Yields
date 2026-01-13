@@ -99,6 +99,7 @@ export default function Home() {
           <MetricsCards
             metrics={data?.data?.metrics}
             timeSeries={data?.data?.timeSeries}
+            currentRates={data?.data?.currentRates}
             isLoading={isLoading}
             selectedDefi={selectedDefi}
             selectedTradfi={selectedTradfi}

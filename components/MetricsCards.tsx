@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { formatPercent, formatDate } from "@/lib/utils";
-import { SpreadMetrics, SpreadDataPoint } from "@/types";
+import { SpreadMetrics, SpreadDataPoint, CurrentRates } from "@/types";
 import { DefiSelection, TradfiSelection } from "@/app/page";
 import {
   LineChart,
@@ -14,6 +14,7 @@ import {
 interface MetricsCardsProps {
   metrics?: SpreadMetrics;
   timeSeries?: SpreadDataPoint[];
+  currentRates?: CurrentRates;
   isLoading?: boolean;
   selectedDefi: DefiSelection;
   selectedTradfi: TradfiSelection;
@@ -57,6 +58,27 @@ function getTradfiLabel(selection: TradfiSelection): string {
       return "Fed Funds";
     case "tbill":
       return "3M T-Bill";
+  }
+}
+
+// Get current rate from CurrentRates based on selection
+function getCurrentDefiRate(rates: CurrentRates, selection: DefiSelection): number {
+  switch (selection) {
+    case "aaveUsdc":
+      return rates.defi.aaveUsdc;
+    case "aaveUsdt":
+      return rates.defi.aaveUsdt;
+    case "compoundUsdc":
+      return rates.defi.compoundUsdc;
+  }
+}
+
+function getCurrentTradfiRate(rates: CurrentRates, selection: TradfiSelection): number {
+  switch (selection) {
+    case "fedFunds":
+      return rates.tradfi.fedFunds;
+    case "tbill":
+      return rates.tradfi.tbill;
   }
 }
 
@@ -206,6 +228,7 @@ function MetricCard({
 export default function MetricsCards({
   metrics,
   timeSeries,
+  currentRates,
   isLoading,
   selectedDefi,
   selectedTradfi,
@@ -221,32 +244,39 @@ export default function MetricsCards({
     return computeSelectedMetrics(timeSeries, defiKey, tradfiKey);
   }, [timeSeries, defiKey, tradfiKey]);
 
+  // Use actual current rates for "Current Spread" (not historical time series)
+  const currentSpread = useMemo(() => {
+    if (!currentRates) return 0;
+    const defiRate = getCurrentDefiRate(currentRates, selectedDefi);
+    const tradfiRate = getCurrentTradfiRate(currentRates, selectedTradfi);
+    return defiRate - tradfiRate;
+  }, [currentRates, selectedDefi, selectedTradfi]);
+
   // Calculate context data
   const avgSpread = selectedMetrics?.averageSpread || 0;
-  const currentSpread = selectedMetrics?.currentSpread || 0;
   const vsAverage = currentSpread - avgSpread;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <MetricCard
         title="Current Spread"
-        value={selectedMetrics ? formatPercent(selectedMetrics.currentSpread) : "--"}
+        value={currentRates ? formatPercent(currentSpread) : "--"}
         subtitle={
-          selectedMetrics
+          currentRates && selectedMetrics
             ? `${vsAverage >= 0 ? "+" : ""}${formatPercent(vsAverage)} vs avg`
             : undefined
         }
         description={`${defiLabel} minus ${tradfiLabel}. Positive = DeFi pays more.`}
         isLoading={isLoading}
-        isPositive={selectedMetrics ? selectedMetrics.currentSpread > 0 : undefined}
+        isPositive={currentRates ? currentSpread > 0 : undefined}
         sparklineData={selectedMetrics?.dataWithSpread}
         sparklineKey="computedSpread"
         sparklineColor={currentSpread >= 0 ? "#10b981" : "#ef4444"}
         icon={
           <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-            selectedMetrics && selectedMetrics.currentSpread >= 0 ? "bg-emerald-100" : "bg-red-100"
+            currentSpread >= 0 ? "bg-emerald-100" : "bg-red-100"
           }`}>
-            {selectedMetrics && selectedMetrics.currentSpread >= 0 ? (
+            {currentSpread >= 0 ? (
               <svg className="w-3 h-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 10l7-7m0 0l7 7m-7-7v18" />
               </svg>

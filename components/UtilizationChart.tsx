@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
-  AreaChart,
-  Area,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -12,6 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { formatShortDate } from "@/lib/utils";
+import { format, parseISO } from "date-fns";
 
 interface UtilizationData {
   poolId: string;
@@ -36,6 +37,26 @@ const POOL_CONFIGS: PoolConfig[] = [
   { key: "aave-v3-USDT", name: "Aave USDT", color: "#8b5cf6" },
   { key: "compound-v3-USDC", name: "Compound USDC", color: "#06b6d4" },
 ];
+
+type TimeRange = "1w" | "1m" | "3m" | "6m" | "1y" | "all" | "custom";
+
+const TIME_RANGES: { value: TimeRange; label: string; days: number }[] = [
+  { value: "1w", label: "1W", days: 7 },
+  { value: "1m", label: "1M", days: 30 },
+  { value: "3m", label: "3M", days: 90 },
+  { value: "6m", label: "6M", days: 180 },
+  { value: "1y", label: "1Y", days: 365 },
+  { value: "all", label: "All", days: Infinity },
+];
+
+// Format date for axis based on time range
+function formatAxisDate(dateStr: string, timeRange: TimeRange): string {
+  const d = parseISO(dateStr);
+  if (timeRange === "1w" || timeRange === "1m" || timeRange === "3m" || timeRange === "custom") {
+    return format(d, "MMM d");
+  }
+  return format(d, "MMM ''yy");
+}
 
 function formatTvl(value: number): string {
   if (value >= 1e9) {
@@ -83,6 +104,10 @@ export default function UtilizationChart({
   const [visiblePools, setVisiblePools] = useState<Set<string>>(
     new Set(POOL_CONFIGS.map((p) => p.key))
   );
+  const [timeRange, setTimeRange] = useState<TimeRange>("3m");
+  const [customStartDate, setCustomStartDate] = useState<string>("");
+  const [customEndDate, setCustomEndDate] = useState<string>("");
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const togglePool = (key: string) => {
     setVisiblePools((prev) => {
@@ -104,10 +129,24 @@ export default function UtilizationChart({
     setVisiblePools(new Set());
   };
 
-  // Merge all pool data into a single time series
-  const mergedData: Array<Record<string, number | string>> = [];
+  const handleTimeRangeChange = (range: TimeRange) => {
+    setTimeRange(range);
+    if (range !== "custom") {
+      setShowDatePicker(false);
+    }
+  };
 
-  if (data) {
+  const applyCustomDateRange = () => {
+    if (customStartDate && customEndDate) {
+      setTimeRange("custom");
+      setShowDatePicker(false);
+    }
+  };
+
+  // Merge all pool data into a single time series and filter by time range
+  const mergedData = useMemo(() => {
+    if (!data) return [];
+
     const dateMap = new Map<string, Record<string, number | string>>();
 
     for (const pool of data) {
@@ -120,18 +159,40 @@ export default function UtilizationChart({
       }
     }
 
-    // Sort by date and sample for performance
+    // Sort by date
     const sortedDates = Array.from(dateMap.keys()).sort();
-    const sampledDates = sortedDates.filter(
-      (_, i) => i % 7 === 0 || i === sortedDates.length - 1
+
+    // Filter by time range
+    let filteredDates = sortedDates;
+    if (timeRange === "custom" && customStartDate && customEndDate) {
+      const startDate = new Date(customStartDate);
+      const endDate = new Date(customEndDate);
+      filteredDates = sortedDates.filter((dateStr) => {
+        const date = new Date(dateStr);
+        return date >= startDate && date <= endDate;
+      });
+    } else {
+      const range = TIME_RANGES.find((r) => r.value === timeRange);
+      if (range && range.days !== Infinity) {
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - range.days);
+        filteredDates = sortedDates.filter((dateStr) => new Date(dateStr) >= cutoffDate);
+      }
+    }
+
+    // Sample for performance (show every Nth day based on range)
+    let sampleInterval = 1;
+    if (filteredDates.length > 90) sampleInterval = 7;
+    else if (filteredDates.length > 30) sampleInterval = 3;
+
+    const sampledDates = filteredDates.filter(
+      (_, i) => i % sampleInterval === 0 || i === filteredDates.length - 1
     );
 
-    for (const date of sampledDates) {
-      mergedData.push(dateMap.get(date)!);
-    }
-  }
+    return sampledDates.map((date) => dateMap.get(date)!);
+  }, [data, timeRange, customStartDate, customEndDate]);
 
-  // Calculate total TVL for visible pools only
+  // Calculate total TVL for visible pools only (from latest data point)
   const latestData = mergedData[mergedData.length - 1];
   const totalTvl = latestData
     ? Object.entries(latestData)
@@ -150,7 +211,7 @@ export default function UtilizationChart({
     <div className="bg-slate-100 rounded-xl border border-slate-300 overflow-hidden">
       <div className="p-4 border-b border-slate-300">
         <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold text-slate-800">
                 DeFi Total Value Locked
@@ -159,39 +220,109 @@ export default function UtilizationChart({
                 Capital deposited in tracked lending pools
               </p>
             </div>
-            <div className="text-right">
-              <p className="text-2xl font-bold text-slate-800">{formatTvl(totalTvl)}</p>
-              <p className="text-xs text-slate-500">Selected pools TVL</p>
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <p className="text-2xl font-bold text-slate-800">{formatTvl(totalTvl)}</p>
+                <p className="text-xs text-slate-500">Selected pools TVL</p>
+              </div>
             </div>
           </div>
 
-          {/* Pool toggles */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs text-slate-500 mr-1">Show:</span>
-            {availablePools.map((pool) => (
-              <ToggleButton
-                key={pool.key}
-                active={visiblePools.has(pool.key)}
-                onClick={() => togglePool(pool.key)}
-                color={pool.color}
-              >
-                {pool.name}
-              </ToggleButton>
-            ))}
-            <div className="flex items-center gap-1 ml-2 pl-2 border-l border-slate-300">
-              <button
-                onClick={selectAll}
-                className="text-xs text-indigo-600 hover:underline"
-              >
-                All
-              </button>
-              <span className="text-gray-300">|</span>
-              <button
-                onClick={selectNone}
-                className="text-xs text-indigo-600 hover:underline"
-              >
-                None
-              </button>
+          {/* Controls row */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            {/* Pool toggles */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs text-slate-500 mr-1">Show:</span>
+              {availablePools.map((pool) => (
+                <ToggleButton
+                  key={pool.key}
+                  active={visiblePools.has(pool.key)}
+                  onClick={() => togglePool(pool.key)}
+                  color={pool.color}
+                >
+                  {pool.name}
+                </ToggleButton>
+              ))}
+              <div className="flex items-center gap-1 ml-2 pl-2 border-l border-slate-300">
+                <button
+                  onClick={selectAll}
+                  className="text-xs text-indigo-600 hover:underline"
+                >
+                  All
+                </button>
+                <span className="text-gray-300">|</span>
+                <button
+                  onClick={selectNone}
+                  className="text-xs text-indigo-600 hover:underline"
+                >
+                  None
+                </button>
+              </div>
+            </div>
+
+            {/* Time range selector */}
+            <div className="flex items-center gap-2">
+              <div className="flex rounded-lg border border-slate-300 overflow-hidden">
+                {TIME_RANGES.map((range) => (
+                  <button
+                    key={range.value}
+                    onClick={() => handleTimeRangeChange(range.value)}
+                    className={`px-2.5 py-1 text-xs font-medium transition-colors ${
+                      timeRange === range.value
+                        ? "bg-indigo-600 text-white"
+                        : "bg-slate-50 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    {range.label}
+                  </button>
+                ))}
+              </div>
+              {/* Custom date range button */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowDatePicker(!showDatePicker)}
+                  className={`px-2.5 py-1 text-xs font-medium rounded-lg border transition-colors ${
+                    timeRange === "custom"
+                      ? "bg-indigo-600 text-white border-indigo-600"
+                      : "bg-slate-50 text-slate-600 border-slate-300 hover:bg-slate-200"
+                  }`}
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </button>
+                {showDatePicker && (
+                  <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-slate-200 p-4 z-10 min-w-[280px]">
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-xs font-medium text-slate-600 mb-1">Start Date</label>
+                        <input
+                          type="date"
+                          value={customStartDate}
+                          onChange={(e) => setCustomStartDate(e.target.value)}
+                          className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-slate-600 mb-1">End Date</label>
+                        <input
+                          type="date"
+                          value={customEndDate}
+                          onChange={(e) => setCustomEndDate(e.target.value)}
+                          className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        />
+                      </div>
+                      <button
+                        onClick={applyCustomDateRange}
+                        disabled={!customStartDate || !customEndDate}
+                        className="w-full px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Apply Range
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -213,30 +344,14 @@ export default function UtilizationChart({
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart
+              <LineChart
                 data={mergedData}
                 margin={{ top: 10, right: 30, left: 0, bottom: 5 }}
               >
-                <defs>
-                  {availablePools.map((pool) => (
-                    <linearGradient
-                      key={pool.key}
-                      id={`gradient-${pool.key}`}
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop offset="5%" stopColor={pool.color} stopOpacity={0.4} />
-                      <stop offset="95%" stopColor={pool.color} stopOpacity={0.05} />
-                    </linearGradient>
-                  ))}
-                </defs>
-
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis
                   dataKey="date"
-                  tickFormatter={(date) => formatShortDate(date)}
+                  tickFormatter={(date) => formatAxisDate(date, timeRange)}
                   tick={{ fontSize: 11, fill: "#6b7280" }}
                   stroke="#d1d5db"
                   tickLine={false}
@@ -262,19 +377,18 @@ export default function UtilizationChart({
 
                 {availablePools.map((pool) =>
                   visiblePools.has(pool.key) ? (
-                    <Area
+                    <Line
                       key={pool.key}
                       type="monotone"
                       dataKey={pool.key}
                       name={pool.name}
                       stroke={pool.color}
-                      fill={`url(#gradient-${pool.key})`}
                       strokeWidth={2}
-                      stackId="1"
+                      dot={false}
                     />
                   ) : null
                 )}
-              </AreaChart>
+              </LineChart>
             </ResponsiveContainer>
           )}
         </div>
