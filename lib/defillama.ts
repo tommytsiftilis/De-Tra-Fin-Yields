@@ -1,4 +1,4 @@
-import { DefiPool, ApyHistory } from "@/types";
+import { DefiPool, ApyHistory, UtilizationHistory } from "@/types";
 
 const BASE_URL = "https://yields.llama.fi";
 
@@ -85,5 +85,43 @@ export async function fetchTrackedPoolsWithHistory(): Promise<{
   const historical = new Map(historyResults);
 
   return { current: pools, historical };
+}
+
+// Pools that support utilization data (have borrow markets, not vaults)
+export const UTILIZATION_POOLS = {
+  AAVE_V3_USDC: TRACKED_POOLS.AAVE_V3_USDC,
+  AAVE_V3_USDT: TRACKED_POOLS.AAVE_V3_USDT,
+  COMPOUND_V3_USDC: TRACKED_POOLS.COMPOUND_V3_USDC,
+  // Note: Morpho is excluded - it's a vault aggregator without direct borrow data
+};
+
+export async function fetchPoolUtilizationHistory(
+  poolId: string
+): Promise<UtilizationHistory> {
+  const response = await fetch(`${BASE_URL}/chartLendBorrow/${poolId}`, {
+    next: { revalidate: 3600 },
+  });
+
+  if (!response.ok) {
+    throw new Error(`DefiLlama chartLendBorrow API error: ${response.status}`);
+  }
+
+  const json = await response.json();
+  const rawData = json.data || [];
+
+  // Calculate utilization for each data point
+  const data = rawData.map(
+    (point: { timestamp: string; totalSupplyUsd: number; totalBorrowUsd: number }) => ({
+      timestamp: point.timestamp,
+      totalSupplyUsd: point.totalSupplyUsd || 0,
+      totalBorrowUsd: point.totalBorrowUsd || 0,
+      utilization:
+        point.totalSupplyUsd > 0
+          ? (point.totalBorrowUsd / point.totalSupplyUsd) * 100
+          : 0,
+    })
+  );
+
+  return { data };
 }
 

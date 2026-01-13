@@ -6,7 +6,8 @@ import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import RatesTable from "@/components/RatesTable";
 import SpreadChart from "@/components/SpreadChart";
-import UtilizationChart from "@/components/UtilizationChart";
+import TvlChart from "@/components/TvlChart";
+import UtilizationRateChart from "@/components/UtilizationRateChart";
 import MetricsCards from "@/components/MetricsCards";
 import { SpreadDataPoint, SpreadMetrics, CurrentRates } from "@/types";
 
@@ -19,11 +20,22 @@ interface SpreadApiResponse {
     timeSeries: SpreadDataPoint[];
     metrics: SpreadMetrics;
     currentRates: CurrentRates;
-    utilization: Array<{
+    tvl: Array<{
       poolId: string;
       project: string;
       symbol: string;
       history: Array<{ date: string; tvlUsd: number }>;
+    }>;
+    utilization: Array<{
+      poolId: string;
+      displayName: string;
+      symbol: string;
+      history: Array<{
+        date: string;
+        utilization: number;
+        totalSupplyUsd: number;
+        totalBorrowUsd: number;
+      }>;
     }>;
   };
   error?: string;
@@ -113,14 +125,20 @@ export default function Home() {
             selectedTradfi={selectedTradfi}
           />
 
+          {/* Utilization Rate Chart - explains why rates move */}
+          <UtilizationRateChart
+            data={data?.data?.utilization}
+            isLoading={isLoading}
+          />
+
           {/* Two-column layout for table and TVL */}
           <div className="grid lg:grid-cols-2 gap-6 items-start">
             <RatesTable
               rates={data?.data?.currentRates}
               isLoading={isLoading}
             />
-            <UtilizationChart
-              data={data?.data?.utilization}
+            <TvlChart
+              data={data?.data?.tvl}
               isLoading={isLoading}
             />
           </div>

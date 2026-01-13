@@ -98,7 +98,7 @@ function ToggleButton({
   );
 }
 
-export default function UtilizationChart({
+export default function TvlChart({
   data,
   isLoading,
 }: UtilizationChartProps) {

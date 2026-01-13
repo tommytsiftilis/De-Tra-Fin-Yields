@@ -20,6 +20,18 @@ export interface ApyHistory {
   data: ApyHistoryPoint[];
 }
 
+// Utilization data from /chartLendBorrow endpoint
+export interface UtilizationHistoryPoint {
+  timestamp: string;
+  totalSupplyUsd: number;
+  totalBorrowUsd: number;
+  utilization: number; // Calculated: totalBorrowUsd / totalSupplyUsd
+}
+
+export interface UtilizationHistory {
+  data: UtilizationHistoryPoint[];
+}
+
 // FRED Types
 
 export interface FredObservation {
