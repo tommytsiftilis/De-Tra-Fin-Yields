@@ -59,6 +59,12 @@ const POOL_CONFIGS: PoolConfig[] = [
     color: "#06b6d4",
     optimalUtilization: 93, // Compound V3's kink
   },
+  {
+    poolId: "b55f43a8-f444-4cd8-a3a4-0a4e786ba566",
+    name: "Morpho USDC",
+    color: "#10b981",
+    optimalUtilization: 90,
+  },
 ];
 
 type TimeRange = "1w" | "1m" | "3m" | "6m" | "1y" | "all";
@@ -280,8 +286,8 @@ export default function UtilizationRateChart({
               <h2 className="text-xl font-semibold tracking-tight text-white">
                 Utilization Rates
               </h2>
-              <p className="text-sm text-slate-400 mt-0.5">
-                Borrowed / Supplied — explains why lending rates move
+              <p className="text-sm text-slate-300 font-medium mt-0.5">
+                Borrowed / Supplied - shows why lending rates move
               </p>
             </div>
             <div className="flex items-center gap-4">

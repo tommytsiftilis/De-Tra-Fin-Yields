@@ -98,7 +98,7 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
                 <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
                 <h2 className="text-xl font-semibold text-slate-100 tracking-tight">DeFi Stablecoin Yields</h2>
               </div>
-              <p className="text-sm text-slate-400 mt-0.5">
+              <p className="text-sm text-slate-300 font-medium mt-0.5">
                 Current lending rates from decentralized protocols
               </p>
             </div>

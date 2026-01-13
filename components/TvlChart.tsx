@@ -212,7 +212,7 @@ export default function TvlChart({
                   DeFi Total Value Locked
                 </h2>
               </div>
-              <p className="text-sm text-slate-400 mt-0.5 pl-3 ml-1">
+              <p className="text-sm text-slate-300 font-medium mt-0.5 pl-3 ml-1">
                 Capital deposited in tracked lending pools
               </p>
             </div>
@@ -239,20 +239,9 @@ export default function TvlChart({
                   {pool.name}
                 </ToggleButton>
               ))}
-              <div className="flex items-center gap-1 ml-2 pl-2 border-l border-slate-600">
-                <button
-                  onClick={selectAll}
-                  className="text-xs text-indigo-600 hover:underline"
-                >
-                  All
-                </button>
-                <span className="text-gray-300">|</span>
-                <button
-                  onClick={selectNone}
-                  className="text-xs text-indigo-600 hover:underline"
-                >
-                  None
-                </button>
+              <div className="flex items-center gap-1 bg-slate-700/50 rounded-lg p-0.5">
+                <button onClick={selectAll} className="px-2 py-0.5 text-xs font-medium text-slate-300 hover:bg-slate-600 rounded transition-colors">All</button>
+                <button onClick={selectNone} className="px-2 py-0.5 text-xs font-medium text-slate-300 hover:bg-slate-600 rounded transition-colors">None</button>
               </div>
             </div>
 
