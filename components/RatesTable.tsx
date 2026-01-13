@@ -52,8 +52,6 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
       : rates.tradfi.tbill
     : 0;
 
-  const baseRateLabel = riskFreeBase === "fedFunds" ? "Fed Funds" : "3M T-Bill";
-
   const defiRows: DefiRateRow[] = rates
     ? [
         {
@@ -84,10 +82,9 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
   const bestDefiApy = defiRows.length > 0 ? Math.max(...defiRows.map((r) => r.apy)) : 0;
 
   return (
-    <div className="space-y-4">
-      {/* DeFi Rates Table */}
-      <div className="bg-slate-100 rounded-xl border border-slate-300 overflow-hidden">
-        <div className="p-4 border-b border-slate-300">
+    <div className="bg-slate-100 rounded-xl border border-slate-300 overflow-hidden">
+      <div className="p-4 border-b border-slate-300">
+        <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2">
@@ -99,7 +96,35 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
               </p>
             </div>
           </div>
+
+          {/* TradFi comparison selector */}
+          <div className="flex items-center gap-3 p-2 bg-slate-200 rounded-lg">
+            <span className="text-xs text-slate-500">Compare to:</span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setRiskFreeBase("fedFunds")}
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  riskFreeBase === "fedFunds"
+                    ? "bg-amber-100 text-amber-800 border border-amber-300"
+                    : "bg-slate-50 text-slate-600 border border-slate-300 hover:bg-slate-100"
+                }`}
+              >
+                Fed Funds {rates && <span className="font-mono">({formatPercent(rates.tradfi.fedFunds)})</span>}
+              </button>
+              <button
+                onClick={() => setRiskFreeBase("tbill")}
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  riskFreeBase === "tbill"
+                    ? "bg-amber-100 text-amber-800 border border-amber-300"
+                    : "bg-slate-50 text-slate-600 border border-slate-300 hover:bg-slate-100"
+                }`}
+              >
+                3M T-Bill {rates && <span className="font-mono">({formatPercent(rates.tradfi.tbill)})</span>}
+              </button>
+            </div>
+          </div>
         </div>
+      </div>
 
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -108,19 +133,7 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
                 <th className="px-4 py-3">Asset</th>
                 <th className="px-4 py-3">Protocol</th>
                 <th className="px-4 py-3 text-right">Current APY</th>
-                <th className="px-4 py-3 text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <span>vs</span>
-                    <select
-                      value={riskFreeBase}
-                      onChange={(e) => setRiskFreeBase(e.target.value as RiskFreeBase)}
-                      className="appearance-none bg-slate-50 border border-slate-300 rounded px-2 py-0.5 text-xs font-medium text-slate-700 cursor-pointer hover:border-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                    >
-                      <option value="fedFunds">Fed Funds</option>
-                      <option value="tbill">3M T-Bill</option>
-                    </select>
-                  </div>
-                </th>
+                <th className="px-4 py-3 text-right">Spread</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
@@ -193,99 +206,9 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
 
         <div className="px-4 py-3 bg-slate-200 border-t border-slate-300">
           <p className="text-xs text-slate-500">
-            Comparing against <span className="font-medium">{baseRateLabel}</span> ({formatPercent(baseRate)}).
             Positive spread means DeFi offers higher yields with smart contract risk.
           </p>
         </div>
-      </div>
-
-      {/* TradFi Rates Card */}
-      <div className="bg-slate-100 rounded-xl border border-slate-300 overflow-hidden">
-        <div className="p-4 border-b border-slate-300">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-            <h2 className="text-lg font-semibold text-slate-800">TradFi Risk-Free Rates</h2>
-          </div>
-          <p className="text-sm text-slate-500 mt-0.5">
-            Federal Reserve benchmark rates
-          </p>
-        </div>
-
-        <div className="p-4">
-          {isLoading ? (
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="p-4 bg-slate-200 rounded-lg animate-pulse">
-                <div className="h-4 w-24 bg-slate-300 rounded mb-2" />
-                <div className="h-8 w-20 bg-slate-300 rounded" />
-              </div>
-              <div className="p-4 bg-slate-200 rounded-lg animate-pulse">
-                <div className="h-4 w-24 bg-slate-300 rounded mb-2" />
-                <div className="h-8 w-20 bg-slate-300 rounded" />
-              </div>
-            </div>
-          ) : rates ? (
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div
-                className={`p-4 rounded-lg border transition-colors ${
-                  riskFreeBase === "fedFunds"
-                    ? "bg-amber-50 border-amber-200"
-                    : "bg-slate-200 border-slate-300 hover:border-slate-400 cursor-pointer"
-                }`}
-                onClick={() => setRiskFreeBase("fedFunds")}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-sm font-medium text-slate-700">Fed Funds Rate</p>
-                  {riskFreeBase === "fedFunds" && (
-                    <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium">
-                      Base
-                    </span>
-                  )}
-                </div>
-                <p className="text-2xl font-bold font-mono text-amber-600">
-                  {formatPercent(rates.tradfi.fedFunds)}
-                </p>
-                <p className="text-xs text-slate-500 mt-1">
-                  Overnight interbank lending rate
-                </p>
-              </div>
-
-              <div
-                className={`p-4 rounded-lg border transition-colors ${
-                  riskFreeBase === "tbill"
-                    ? "bg-amber-50 border-amber-200"
-                    : "bg-slate-200 border-slate-300 hover:border-slate-400 cursor-pointer"
-                }`}
-                onClick={() => setRiskFreeBase("tbill")}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-sm font-medium text-slate-700">3-Month T-Bill</p>
-                  {riskFreeBase === "tbill" && (
-                    <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium">
-                      Base
-                    </span>
-                  )}
-                </div>
-                <p className="text-2xl font-bold font-mono text-amber-600">
-                  {formatPercent(rates.tradfi.tbill)}
-                </p>
-                <p className="text-xs text-slate-500 mt-1">
-                  US Treasury Bill yield
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center text-slate-400 py-8">
-              No data available
-            </div>
-          )}
-        </div>
-
-        <div className="px-4 py-3 bg-slate-200 border-t border-slate-300">
-          <p className="text-xs text-slate-500">
-            Click a rate to use it as the comparison base for DeFi yields above.
-          </p>
-        </div>
-      </div>
     </div>
   );
 }

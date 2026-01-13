@@ -113,7 +113,7 @@ export default function Home() {
           />
 
           {/* Two-column layout for table and TVL */}
-          <div className="grid lg:grid-cols-2 gap-6">
+          <div className="grid lg:grid-cols-2 gap-6 items-start">
             <RatesTable
               rates={data?.data?.currentRates}
               isLoading={isLoading}

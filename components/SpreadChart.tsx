@@ -26,9 +26,11 @@ interface SpreadChartProps {
   selectedTradfi: TradfiSelection;
 }
 
-type TimeRange = "3m" | "6m" | "1y" | "all";
+type TimeRange = "1w" | "1m" | "3m" | "6m" | "1y" | "all" | "custom";
 
 const TIME_RANGES: { value: TimeRange; label: string; days: number; tickInterval: number }[] = [
+  { value: "1w", label: "1W", days: 7, tickInterval: 1 },       // Daily
+  { value: "1m", label: "1M", days: 30, tickInterval: 5 },      // Every 5 days
   { value: "3m", label: "3M", days: 90, tickInterval: 14 },     // Every 2 weeks
   { value: "6m", label: "6M", days: 180, tickInterval: 30 },    // Monthly
   { value: "1y", label: "1Y", days: 365, tickInterval: 60 },    // Every 2 months
@@ -38,7 +40,7 @@ const TIME_RANGES: { value: TimeRange; label: string; days: number; tickInterval
 // Format date for axis based on time range
 function formatAxisDate(dateStr: string, timeRange: TimeRange): string {
   const d = parseISO(dateStr);
-  if (timeRange === "3m") {
+  if (timeRange === "1w" || timeRange === "1m" || timeRange === "3m" || timeRange === "custom") {
     return format(d, "MMM d");
   }
   return format(d, "MMM ''yy");
@@ -64,24 +66,6 @@ const DATA_SERIES: DataSeries[] = [
   { key: "compoundUsdcApy", name: "Compound USDC", color: "#06b6d4", type: "defi" },
   { key: "fedFundsRate", name: "Fed Funds", color: "#f59e0b", type: "tradfi", dashed: true },
   { key: "tbillRate", name: "3M T-Bill", color: "#f97316", type: "tradfi", dashed: true },
-];
-
-// Spread options for comparing different pairs
-interface SpreadOption {
-  id: string;
-  defiKey: string;
-  tradfiKey: string;
-  name: string;
-  color: string;
-}
-
-const SPREAD_OPTIONS: SpreadOption[] = [
-  { id: "aaveUsdc-fedFunds", defiKey: "aaveUsdcApy", tradfiKey: "fedFundsRate", name: "Aave USDC vs Fed Funds", color: "#10b981" },
-  { id: "aaveUsdc-tbill", defiKey: "aaveUsdcApy", tradfiKey: "tbillRate", name: "Aave USDC vs T-Bill", color: "#059669" },
-  { id: "aaveUsdt-fedFunds", defiKey: "aaveUsdtApy", tradfiKey: "fedFundsRate", name: "Aave USDT vs Fed Funds", color: "#8b5cf6" },
-  { id: "aaveUsdt-tbill", defiKey: "aaveUsdtApy", tradfiKey: "tbillRate", name: "Aave USDT vs T-Bill", color: "#7c3aed" },
-  { id: "compoundUsdc-fedFunds", defiKey: "compoundUsdcApy", tradfiKey: "fedFundsRate", name: "Compound USDC vs Fed Funds", color: "#06b6d4" },
-  { id: "compoundUsdc-tbill", defiKey: "compoundUsdcApy", tradfiKey: "tbillRate", name: "Compound USDC vs T-Bill", color: "#0891b2" },
 ];
 
 function ToggleButton({
@@ -126,10 +110,8 @@ function CustomTooltip({
   payload,
   label,
   visibleSeries,
-  visibleSpreads,
 }: TooltipProps<number, string> & {
   visibleSeries: Set<string>;
-  visibleSpreads: Set<string>;
 }) {
   if (!active || !payload || payload.length === 0) return null;
 
@@ -159,19 +141,6 @@ function CustomTooltip({
       defiName: defiRates[0].name,
       tradfiName: tradfiRates[0].name,
     };
-  }
-
-  // Get visible spread values
-  const spreadValues: { name: string; value: number; color: string }[] = [];
-  for (const entry of payload) {
-    const spreadOpt = SPREAD_OPTIONS.find((s) => s.id === entry.dataKey);
-    if (spreadOpt && visibleSpreads.has(spreadOpt.id) && entry.value !== undefined) {
-      spreadValues.push({
-        name: spreadOpt.name,
-        value: entry.value,
-        color: spreadOpt.color,
-      });
-    }
   }
 
   return (
@@ -219,32 +188,6 @@ function CustomTooltip({
           </p>
         </div>
       )}
-
-      {/* Explicit spread series values */}
-      {spreadValues.length > 0 && (
-        <div className={`${rateValues.length > 0 ? "border-t border-gray-100 pt-2 mt-2" : ""}`}>
-          <p className="text-[10px] uppercase tracking-wide text-slate-400 mb-1">Spreads</p>
-          {spreadValues.map((spread) => (
-            <div key={spread.name} className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <span
-                  className="w-2 h-2 rounded"
-                  style={{ backgroundColor: spread.color }}
-                />
-                <span className="text-xs text-slate-600">{spread.name}</span>
-              </div>
-              <span
-                className={`text-xs font-mono font-medium ${
-                  spread.value >= 0 ? "text-emerald-600" : "text-red-600"
-                }`}
-              >
-                {spread.value >= 0 ? "+" : ""}
-                {formatPercent(spread.value)}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
@@ -255,12 +198,14 @@ export default function SpreadChart({
   selectedDefi,
   selectedTradfi,
 }: SpreadChartProps) {
-  const [timeRange, setTimeRange] = useState<TimeRange>("6m");
+  const [timeRange, setTimeRange] = useState<TimeRange>("3m");
   const [visibleSeries, setVisibleSeries] = useState<Set<string>>(
     new Set(DATA_SERIES.map((s) => s.key))
   );
-  const [visibleSpreads, setVisibleSpreads] = useState<Set<string>>(new Set());
   const [showSpreadArea, setShowSpreadArea] = useState(false);
+  const [customStartDate, setCustomStartDate] = useState<string>("");
+  const [customEndDate, setCustomEndDate] = useState<string>("");
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const toggleSeries = (key: string) => {
     setVisibleSeries((prev) => {
@@ -269,18 +214,6 @@ export default function SpreadChart({
         next.delete(key);
       } else {
         next.add(key);
-      }
-      return next;
-    });
-  };
-
-  const toggleSpread = (id: string) => {
-    setVisibleSpreads((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
       }
       return next;
     });
@@ -302,48 +235,69 @@ export default function SpreadChart({
     setVisibleSeries(new Set(DATA_SERIES.filter((s) => s.type === "tradfi").map((s) => s.key)));
   };
 
-  const selectAllSpreads = () => {
-    setVisibleSpreads(new Set(SPREAD_OPTIONS.map((s) => s.id)));
+  const handleTimeRangeChange = (range: TimeRange) => {
+    setTimeRange(range);
+    if (range !== "custom") {
+      setShowDatePicker(false);
+    }
   };
 
-  const selectNoSpreads = () => {
-    setVisibleSpreads(new Set());
+  const applyCustomDateRange = () => {
+    if (customStartDate && customEndDate) {
+      setTimeRange("custom");
+      setShowDatePicker(false);
+    }
   };
 
   // Filter data by time range and compute spreads
   const chartData = useMemo(() => {
     if (!data) return [];
 
-    const range = TIME_RANGES.find((r) => r.value === timeRange);
     let filtered = data;
-    if (range && range.days !== Infinity) {
-      const cutoffDate = new Date();
-      cutoffDate.setDate(cutoffDate.getDate() - range.days);
-      filtered = data.filter((d) => new Date(d.date) >= cutoffDate);
+
+    if (timeRange === "custom" && customStartDate && customEndDate) {
+      const startDate = new Date(customStartDate);
+      const endDate = new Date(customEndDate);
+      filtered = data.filter((d) => {
+        const date = new Date(d.date);
+        return date >= startDate && date <= endDate;
+      });
+    } else {
+      const range = TIME_RANGES.find((r) => r.value === timeRange);
+      if (range && range.days !== Infinity) {
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - range.days);
+        filtered = data.filter((d) => new Date(d.date) >= cutoffDate);
+      }
     }
 
     // No sampling - show daily granularity
-    // Add computed spreads
+    // Add computed spreads for spread area feature
     return filtered.map((d) => {
-      const spreads: Record<string, number> = {};
-      for (const opt of SPREAD_OPTIONS) {
-        spreads[opt.id] = (d[opt.defiKey as keyof SpreadDataPoint] as number) -
-          (d[opt.tradfiKey as keyof SpreadDataPoint] as number);
-      }
       return {
         ...d,
-        ...spreads,
-        // For legacy spread area (based on selected comparison)
+        // For spread area (based on selected comparison)
         selectedSpread:
           (d[`${selectedDefi === "aaveUsdc" ? "aaveUsdcApy" : selectedDefi === "aaveUsdt" ? "aaveUsdtApy" : "compoundUsdcApy"}`] as number) -
           (d[selectedTradfi === "fedFunds" ? "fedFundsRate" : "tbillRate"] as number),
       };
     });
-  }, [data, timeRange, selectedDefi, selectedTradfi]);
+  }, [data, timeRange, customStartDate, customEndDate, selectedDefi, selectedTradfi]);
 
   // Get tick interval for current time range
   const currentRange = TIME_RANGES.find((r) => r.value === timeRange);
-  const tickInterval = currentRange?.tickInterval || 30;
+  // For custom range, calculate based on number of days
+  const tickInterval = useMemo(() => {
+    if (timeRange === "custom" && customStartDate && customEndDate) {
+      const days = Math.ceil((new Date(customEndDate).getTime() - new Date(customStartDate).getTime()) / (1000 * 60 * 60 * 24));
+      if (days <= 7) return 1;
+      if (days <= 30) return 5;
+      if (days <= 90) return 14;
+      if (days <= 180) return 30;
+      return 60;
+    }
+    return currentRange?.tickInterval || 30;
+  }, [timeRange, customStartDate, customEndDate, currentRange]);
 
   // Generate tick values - show only certain dates
   const ticks = useMemo(() => {
@@ -370,7 +324,7 @@ export default function SpreadChart({
                 Historical Yields
               </h2>
               <p className="text-sm text-slate-500 mt-0.5">
-                DeFi protocol yields vs Federal Reserve rates over time
+                DeFi protocol yields vs. traditional finance rates over time
               </p>
             </div>
 
@@ -387,20 +341,68 @@ export default function SpreadChart({
               </label>
 
               {/* Time range selector */}
-              <div className="flex rounded-lg border border-slate-300 overflow-hidden">
-                {TIME_RANGES.map((range) => (
+              <div className="flex items-center gap-2">
+                <div className="flex rounded-lg border border-slate-300 overflow-hidden">
+                  {TIME_RANGES.map((range) => (
+                    <button
+                      key={range.value}
+                      onClick={() => handleTimeRangeChange(range.value)}
+                      className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+                        timeRange === range.value
+                          ? "bg-indigo-600 text-white"
+                          : "bg-slate-50 text-slate-600 hover:bg-slate-200"
+                      }`}
+                    >
+                      {range.label}
+                    </button>
+                  ))}
+                </div>
+                {/* Custom date range button */}
+                <div className="relative">
                   <button
-                    key={range.value}
-                    onClick={() => setTimeRange(range.value)}
-                    className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-                      timeRange === range.value
-                        ? "bg-indigo-600 text-white"
-                        : "bg-slate-50 text-slate-600 hover:bg-slate-200"
+                    onClick={() => setShowDatePicker(!showDatePicker)}
+                    className={`px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors ${
+                      timeRange === "custom"
+                        ? "bg-indigo-600 text-white border-indigo-600"
+                        : "bg-slate-50 text-slate-600 border-slate-300 hover:bg-slate-200"
                     }`}
                   >
-                    {range.label}
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
                   </button>
-                ))}
+                  {showDatePicker && (
+                    <div className="absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-slate-200 p-4 z-10 min-w-[280px]">
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-xs font-medium text-slate-600 mb-1">Start Date</label>
+                          <input
+                            type="date"
+                            value={customStartDate}
+                            onChange={(e) => setCustomStartDate(e.target.value)}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-slate-600 mb-1">End Date</label>
+                          <input
+                            type="date"
+                            value={customEndDate}
+                            onChange={(e) => setCustomEndDate(e.target.value)}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          />
+                        </div>
+                        <button
+                          onClick={applyCustomDateRange}
+                          disabled={!customStartDate || !customEndDate}
+                          className="w-full px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Apply Range
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -449,36 +451,6 @@ export default function SpreadChart({
               </button>
             </div>
           </div>
-
-          {/* Spread series toggles */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs text-slate-500 mr-1">Spreads:</span>
-            {SPREAD_OPTIONS.map((spread) => (
-              <ToggleButton
-                key={spread.id}
-                active={visibleSpreads.has(spread.id)}
-                onClick={() => toggleSpread(spread.id)}
-                color={spread.color}
-              >
-                {spread.name.replace(" vs ", " - ")}
-              </ToggleButton>
-            ))}
-            <div className="flex items-center gap-1 ml-2 pl-2 border-l border-slate-300">
-              <button
-                onClick={selectAllSpreads}
-                className="text-xs text-indigo-600 hover:underline"
-              >
-                All
-              </button>
-              <span className="text-gray-300">|</span>
-              <button
-                onClick={selectNoSpreads}
-                className="text-xs text-indigo-600 hover:underline"
-              >
-                None
-              </button>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -492,9 +464,9 @@ export default function SpreadChart({
             <div className="h-full flex items-center justify-center text-slate-400">
               No data available
             </div>
-          ) : visibleSeries.size === 0 && visibleSpreads.size === 0 ? (
+          ) : visibleSeries.size === 0 ? (
             <div className="h-full flex items-center justify-center text-slate-400">
-              Select at least one rate or spread to display
+              Select at least one rate to display
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
@@ -507,19 +479,6 @@ export default function SpreadChart({
                     <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
                     <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                   </linearGradient>
-                  {SPREAD_OPTIONS.map((spread) => (
-                    <linearGradient
-                      key={spread.id}
-                      id={`gradient-${spread.id}`}
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop offset="5%" stopColor={spread.color} stopOpacity={0.3} />
-                      <stop offset="95%" stopColor={spread.color} stopOpacity={0} />
-                    </linearGradient>
-                  ))}
                 </defs>
 
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -544,7 +503,6 @@ export default function SpreadChart({
                   content={
                     <CustomTooltip
                       visibleSeries={visibleSeries}
-                      visibleSpreads={visibleSpreads}
                     />
                   }
                 />
@@ -567,21 +525,6 @@ export default function SpreadChart({
                     stroke="#10b981"
                     strokeWidth={0}
                   />
-                )}
-
-                {/* Spread lines */}
-                {SPREAD_OPTIONS.map((spread) =>
-                  visibleSpreads.has(spread.id) ? (
-                    <Area
-                      key={spread.id}
-                      type="monotone"
-                      dataKey={spread.id}
-                      name={spread.name}
-                      stroke={spread.color}
-                      fill={`url(#gradient-${spread.id})`}
-                      strokeWidth={2}
-                    />
-                  ) : null
                 )}
 
                 {/* Rate lines */}
