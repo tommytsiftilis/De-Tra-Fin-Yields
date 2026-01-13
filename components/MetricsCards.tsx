@@ -187,7 +187,7 @@ function MetricCard({
   return (
     <div className="bg-slate-900/50 rounded-xl border border-slate-700/50 p-4 hover:bg-slate-800/50 transition-shadow">
       <div className="flex items-start justify-between mb-2">
-        <p className="text-sm font-medium text-slate-400">{title}</p>
+        <p className="text-sm font-medium text-slate-300">{title}</p>
         {icon}
       </div>
 
@@ -197,10 +197,10 @@ function MetricCard({
         <p
           className={`text-2xl font-bold ${
             isPositive === undefined
-              ? "text-slate-100"
+              ? "text-white"
               : isPositive
-                ? "text-emerald-600"
-                : "text-red-600"
+                ? "text-emerald-400"
+                : "text-red-400"
           }`}
         >
           {value}
@@ -208,7 +208,7 @@ function MetricCard({
       )}
 
       {subtitle && (
-        <p className="text-xs text-slate-500 mt-1">{subtitle}</p>
+        <p className="text-xs text-slate-400 mt-1">{subtitle}</p>
       )}
 
       {sparklineData && sparklineKey && sparklineColor && !isLoading && (

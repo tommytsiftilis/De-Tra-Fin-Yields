@@ -13,10 +13,10 @@ export default function Header({ timestamp }: HeaderProps) {
     <header className="mb-8">
       {/* Title and last updated in same row */}
       <div className="flex flex-col items-center text-center">
-        <h1 className="text-3xl font-bold text-slate-100">
+        <h1 className="text-3xl font-bold text-white">
           DeFi vs TradFi Yields
         </h1>
-        <p className="text-slate-400 mt-1 max-w-xl text-sm">
+        <p className="text-slate-300 mt-1 max-w-xl text-sm">
           Real-time comparison of DeFi stablecoin yields vs traditional risk-free rates
         </p>
         {timestamp && (

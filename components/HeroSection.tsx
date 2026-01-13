@@ -142,7 +142,7 @@ export default function HeroSection({
           <div className="inline-block">
             <div className="flex items-center justify-center md:justify-end gap-2 mb-2">
               <span className="w-3 h-3 rounded-full bg-indigo-500"></span>
-              <span className="text-sm font-medium text-indigo-400">DeFi Stablecoin</span>
+              <span className="text-sm font-medium text-indigo-300">DeFi Stablecoin</span>
             </div>
 
             {/* DeFi selector */}
@@ -158,7 +158,7 @@ export default function HeroSection({
             {isLoading ? (
               <Skeleton className="h-12 w-32 mx-auto md:ml-auto md:mr-0" />
             ) : (
-              <p className="text-4xl md:text-5xl font-bold text-slate-100">
+              <p className="text-4xl md:text-5xl font-bold text-white" style={{ textShadow: '0 0 20px rgba(255,255,255,0.3)' }}>
                 {formatPercent(defiRate)}
               </p>
             )}
@@ -186,7 +186,7 @@ export default function HeroSection({
               <>
                 <p
                   className={`text-3xl font-bold text-center ${
-                    spread >= 0 ? "text-emerald-600" : "text-red-600"
+                    spread >= 0 ? "text-emerald-400" : "text-red-400"
                   }`}
                 >
                   {spread >= 0 ? "+" : ""}
@@ -194,7 +194,7 @@ export default function HeroSection({
                 </p>
                 <p
                   className={`text-xs text-center mt-1 ${
-                    spread >= 0 ? "text-emerald-600" : "text-red-600"
+                    spread >= 0 ? "text-emerald-400" : "text-red-400"
                   }`}
                 >
                   {spread >= 0
@@ -230,7 +230,7 @@ export default function HeroSection({
           <div className="inline-block">
             <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
               <span className="w-3 h-3 rounded-full bg-amber-500"></span>
-              <span className="text-sm font-medium text-amber-500">TradFi Risk-Free</span>
+              <span className="text-sm font-medium text-amber-400">TradFi Risk-Free</span>
             </div>
 
             {/* TradFi selector */}
@@ -246,7 +246,7 @@ export default function HeroSection({
             {isLoading ? (
               <Skeleton className="h-12 w-32 mx-auto md:mr-auto md:ml-0" />
             ) : (
-              <p className="text-4xl md:text-5xl font-bold text-slate-100">
+              <p className="text-4xl md:text-5xl font-bold text-white" style={{ textShadow: '0 0 20px rgba(255,255,255,0.3)' }}>
                 {formatPercent(tradfiRate)}
               </p>
             )}

@@ -25,7 +25,7 @@ function TrendIndicator({ value, baseRate }: { value: number; baseRate: number }
   return (
     <span
       className={`inline-flex items-center gap-1 font-mono ${
-        isPositive ? "text-emerald-600" : "text-red-600"
+        isPositive ? "text-emerald-400" : "text-red-400"
       }`}
     >
       {isPositive ? (
@@ -116,7 +116,7 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
                     : "bg-slate-700 text-slate-300 border border-slate-600 hover:bg-slate-600"
                 }`}
               >
-                Fed Funds {rates && <span className="font-mono">({formatPercent(rates.tradfi.fedFunds)})</span>}
+                Fed Funds {rates && <span className="font-mono font-semibold">({formatPercent(rates.tradfi.fedFunds)})</span>}
               </button>
               <button
                 onClick={() => setRiskFreeBase("tbill")}
@@ -126,7 +126,7 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
                     : "bg-slate-700 text-slate-300 border border-slate-600 hover:bg-slate-600"
                 }`}
               >
-                3M T-Bill {rates && <span className="font-mono">({formatPercent(rates.tradfi.tbill)})</span>}
+                3M T-Bill {rates && <span className="font-mono font-semibold">({formatPercent(rates.tradfi.tbill)})</span>}
               </button>
             </div>
           </div>
@@ -136,7 +136,7 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-slate-800 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
+              <tr className="bg-slate-800 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">
                 <th className="px-4 py-3">Asset</th>
                 <th className="px-4 py-3">Protocol</th>
                 <th className="px-4 py-3 text-right">Current APY</th>
@@ -178,11 +178,11 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
                       }`}
                     >
                       <td className="px-4 py-4">
-                        <span className="font-medium text-slate-100">{row.asset}</span>
+                        <span className="font-medium text-white">{row.asset}</span>
                       </td>
                       <td className="px-4 py-4">
                         <div>
-                          <span className="text-slate-100 font-medium">
+                          <span className="text-white font-medium">
                             {row.protocol}
                           </span>
                           {isBestRate && (
@@ -196,7 +196,7 @@ export default function RatesTable({ rates, isLoading }: RatesTableProps) {
                         </div>
                       </td>
                       <td className="px-4 py-4 text-right">
-                        <span className="text-lg font-mono font-semibold text-indigo-400">
+                        <span className="text-lg font-mono font-bold text-indigo-300">
                           {formatPercent(row.apy)}
                         </span>
                       </td>

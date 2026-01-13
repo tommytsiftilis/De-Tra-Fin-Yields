@@ -252,7 +252,7 @@ export default function UtilizationRateChart({
                   </div>
                   <span
                     className={`text-xs font-mono font-bold ${
-                      isAboveOptimal ? "text-amber-600" : "text-slate-100"
+                      isAboveOptimal ? "text-amber-400" : "text-white"
                     }`}
                   >
                     {entry.value.toFixed(1)}%
@@ -277,7 +277,7 @@ export default function UtilizationRateChart({
         <div className="flex flex-col gap-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-slate-100">
+              <h2 className="text-lg font-semibold text-white">
                 Utilization Rates
               </h2>
               <p className="text-sm text-slate-400 mt-0.5">
@@ -292,7 +292,7 @@ export default function UtilizationRateChart({
                   <div key={pool.poolId} className="text-right">
                     <p
                       className={`text-lg font-bold ${
-                        isAboveOptimal ? "text-amber-600" : "text-slate-100"
+                        isAboveOptimal ? "text-amber-400" : "text-white"
                       }`}
                     >
                       {util?.toFixed(1) || "--"}%

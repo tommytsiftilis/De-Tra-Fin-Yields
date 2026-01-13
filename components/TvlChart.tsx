@@ -214,7 +214,7 @@ export default function TvlChart({
         <div className="flex flex-col gap-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold text-slate-100">
+              <h2 className="text-lg font-semibold text-white">
                 DeFi Total Value Locked
               </h2>
               <p className="text-sm text-slate-400 mt-0.5">
@@ -223,7 +223,7 @@ export default function TvlChart({
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <p className="text-2xl font-bold text-slate-100">{formatTvl(totalTvl)}</p>
+                <p className="text-2xl font-bold text-white">{formatTvl(totalTvl)}</p>
                 <p className="text-xs text-slate-400">Selected pools TVL</p>
               </div>
             </div>

@@ -162,7 +162,7 @@ function CustomTooltip({
                 />
                 <span className="text-xs text-slate-300">{rate.name}</span>
               </div>
-              <span className="text-xs font-mono font-medium text-slate-100">
+              <span className="text-xs font-mono font-medium text-white">
                 {formatPercent(rate.value)}
               </span>
             </div>
@@ -177,7 +177,7 @@ function CustomTooltip({
             <span className="text-xs text-slate-400">Spread</span>
             <span
               className={`text-xs font-mono font-bold ${
-                spreadInfo.spread >= 0 ? "text-emerald-600" : "text-red-600"
+                spreadInfo.spread >= 0 ? "text-emerald-400" : "text-red-400"
               }`}
             >
               {spreadInfo.spread >= 0 ? "+" : ""}
@@ -331,7 +331,7 @@ export default function SpreadChart({
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-lg font-semibold text-slate-100">
+              <h2 className="text-lg font-semibold text-white">
                 Historical Yields
               </h2>
               <p className="text-sm text-slate-400 mt-0.5">
