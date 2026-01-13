@@ -8,7 +8,12 @@ export function formatDate(date: Date | string): string {
 
 export function formatShortDate(date: Date | string): string {
   const d = typeof date === "string" ? parseISO(date) : date;
-  return format(d, "MMM yyyy");
+  return format(d, "MMM d");
+}
+
+export function formatMonthYear(date: Date | string): string {
+  const d = typeof date === "string" ? parseISO(date) : date;
+  return format(d, "MMM ''yy");
 }
 
 export function formatPercent(value: number): string {
